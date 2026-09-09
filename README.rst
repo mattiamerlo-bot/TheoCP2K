@@ -9,6 +9,20 @@ TheoCP2K
 upstream TheoDORE sources and adds a standalone graphical workflow for CP2K
 ``.out`` and ``.cube`` files.
 
+Latest version
+~~~~~~~~~~~~~~
+
+The latest tested development version is always the tip of
+`main <https://github.com/mattiamerlo-bot/TheoCP2K/tree/main>`_. Its Linux
+AppImage is available from the
+`latest successful AppImage workflow <https://github.com/mattiamerlo-bot/TheoCP2K/actions/workflows/appimage.yml?query=branch%3Amain+is%3Asuccess>`_.
+
+Stable versions are published on the
+`releases page <https://github.com/mattiamerlo-bot/TheoCP2K/releases>`_. The
+`latest tagged release <https://github.com/mattiamerlo-bot/TheoCP2K/releases/latest>`_
+contains ``TheoCP2K-x86_64.AppImage`` and ``SHA256SUMS.txt`` whenever at least
+one ``v*`` tag has been created.
+
 The **TheoDORE** (Theoretical Density, Orbital Relaxation and Exciton analysis) package is a program suite for the analysis of excited states obtained from quantum chemical excited state calculations.
 
 *Author*: Felix Plasser
