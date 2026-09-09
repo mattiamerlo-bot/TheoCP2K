@@ -1,0 +1,1681 @@
+\documentclass[DIV=12,headings=normal]{scrartcl}
+\setlength{\parskip}{1em}
+\setlength{\parindent}{0pt}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[USenglish]{babel}
+
+\usepackage[intlimits]{amsmath}
+\usepackage{amssymb}
+\usepackage{icomma}
+\usepackage{braket}
+\usepackage{color}
+\usepackage{listings}
+\usepackage{hyperref}
+
+\usepackage{graphicx}
+%\usepackage{subfig}
+\usepackage{booktabs}
+\usepackage{pdflscape}
+\usepackage{subfigure}
+
+\usepackage{siunitx}
+%\sisetup{decimalsymbol=comma}
+\usepackage{multirow}
+\usepackage{fancyhdr}
+
+\usepackage[version=3,arrows=pgf]{mhchem}
+
+\usepackage{lmodern}
+\usepackage{fancyvrb}
+
+\setkomafont{subject}{\usekomafont{title}}
+\setkomafont{caption}{\small}
+% \captionsetup[subfloat]{font={default,small}}
+
+\newsavebox\MBox
+%\newcommand\Cline[2][red]{{\sbox\MBox{#2}%
+%  \rlap{\usebox\MBox}\color{#1}\rule[-1.2\dp\MBox]{\wd\MBox}{0.5pt}}}
+
+\newcommand{\comment}[1]{\textcolor{blue}{#1}}
+\newcommand{\red}[1]{\textcolor{red}{#1}}
+\newcommand{\redl}[1]{{\textcolor{red}{\texttt{#1}}}}
+\newcommand{\rede}[1]{\redl{#1 <ENTER>}}
+
+\newcommand{\doi}[1]{\href{http://dx.doi.org/#1}{\textcolor{blue}{DOI:~#1}}}
+\newcommand{\om}[1]{\omega_{\textrm{#1}}}
+
+\newcommand{\comm}[1]{
+\small
+~> \redl{#1}
+\normalsize
+}
+
+\newcommand{\incmo}[1]{\includegraphics[trim=1cm 1cm 1cm 1cm, clip=true, width=4cm]{#1}}
+\newcommand{\incom}[1]{\includegraphics[width=3cm]{#1}}
+\newcommand{\incrho}[1]{\includegraphics[trim=3cm 4cm 3cm 4cm, clip=true, width=3.5cm]{#1}}
+
+\let\origttfamily=\ttfamily % alte Definition von \ttfamily sichern
+\renewcommand{\ttfamily}{\origttfamily \hyphenchar\font=`\-}
+
+\newcommand{\greybox}[1]{
+  \vspace{3mm}
+  \fcolorbox{black}{black!15}{
+    \begin{minipage}{0.9\textwidth}\textit{#1}\end{minipage}}
+  \vspace{3mm}
+}
+
+\newcommand{\todo}[1]{\textcolor{red}{#1}}
+
+\newcommand{\theo}{\textsc{TheoDORE}}
+
+\newcounter{number}
+\newcommand{\numbering}[1]{\thenumber. #1\addtocounter{number}{1}}
+\newcommand{\renumber}{\setcounter{number}{1}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\fancyhf{}				%Leeren aller Header, Footer
+\fancyhead{}		%Links
+\fancyfoot[L]{\theo{} tutorial}
+\fancyfoot[R]{\thepage}			%Seite x von y
+\renewcommand{\headrulewidth}{0pt}	%Linie unter Header
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\subject{\Large A Tutorial for \theo}
+\title{\LARGE A Tutorial for \theo~3.0}
+\author{\large Felix~Plasser, \large Patrick Kimber}
+\publishers{\small \textit{Department of Chemistry -- Loughborough University}}
+\date{\large Loughborough, 2020\\[3em]}
+
+\begin{document}
+
+\pagestyle{fancy}
+\selectlanguage{USenglish}
+
+\maketitle
+%\cleardoublepage
+\vspace{-2em}
+\tableofcontents
+\clearpage
+
+\section{Before Starting}
+
+\subsection{Introduction}
+This tutorial is intended to provide an overview over the functionalities of the \theo{} program package.
+Various tasks of different complexity are discussed using interfaces to different quantum chemistry packages.
+It is advisable to go through the whole tutorial but it is of course possible to skip some of the later sections.
+
+All input files are contained in the \texttt{EXAMPLES} directory in the \theo{} distribution.
+They are the same files accessed by the \texttt{theo\_test.bash} program.
+
+\subsection{Notation}
+
+The following notation is used:
+
+\scriptsize
+\begin{Verbatim}[commandchars=\\\{\}]
+This kind of font indiates what is seen on the screen
+\redl{and the command lines that you should write <ENTER>}  \comment{! Comments come here}
+\end{Verbatim}
+\normalsize
+
+\greybox{Important information related to \theo{} but not necessarily connected to the current job comes in boxes like this.}
+
+\subsection{Installation}
+In case of using \texttt{bash} it should suffice to type
+
+\comm{source /mypath/TheoDORE\_3.0/setpaths.bash} \comment{\scriptsize ! replace /mypath with your actual installation}
+
+to set up the required \texttt{THEODIR}, \texttt{PATH} and \texttt{PYTHONPATH} environment variables.
+
+For more information, see
+
+\url{https://theodore-qc.sourceforge.io/docs/installation.html}
+
+\clearpage
+\section{Overview}
+To get an overview over all tools implemented in \theo{}, simpy run.
+
+\comm{theodore}
+
+\scriptsize
+\begin{Verbatim}[commandchars=\\\{\}]
+================================================================================
+|                                 TheoDORE 3.0                                 |
+|         Theoretical Density, Orbital Relaxation and Exciton analysis         |
+|                                                                              |
+|                            Author: Felix Plasser                             |
+|             Contributions by: L. Stojanovic, G. Hermann, S. Mai,             |
+|                          M.F.S.J. Menger, P. Kimber                          |
+--------------------------------------------------------------------------------
+|                       References for the modules used                        |
+|        (see also http://theodore-qc.sourceforge.net/literature.html)         |
+|                                                                              |
+|   Program citation:                                                          |
+|     F. Plasser, J. Chem. Phys. (2020), 152, 084108.                          |
+================================================================================
+  optional arguments:
+  ---------------------------------------------------
+    -h/--help            | show this help message and exit                   
+
+  Actions: options
+  ---------------------------------------------------
+    theoinp              Input generation for TheoDORE                     
+    analyze_tden         Transition density matrix analysis                
+    analyze_tden_unr     Transition density matrix analysis (UHF/UKS)      
+    analyze_tden_es2es   Transition density matrix ana. (state-to-state)   
+    analyze_tden_soc     1TDM analysis for spin-orbit coupled states       
+    analyze_sden         State density matrix analysis                     
+    analyze_nos          Analysis of natural orbital (NO) files            
+    parse_libwfa         Parse libwfa output from Q-Chem or OpenMolcas     
+    plot_vist            Read NICS values and prepare VIST plot            
+    plot_omfrag          Plot Omega matrices as pseudocolor matrix plot    
+    plot_om_bars         Plot Omega matrices as bar graphs                 
+    plot_frag_decomp     Plot fragment decomposition of Omega matrix       
+    plot_graph           Graph plotting for potential curves etc.          
+    plot_graph_nx        Graph plotting (Newton-X)                         
+    jmol_mos             Orbital/density plotting in Jmol                  
+    jmol_vibs            Plotting of vibrations in Jmol                    
+    vmd_plots            Automatic plotting of cube files in VMD           
+    draw_moments         Plotting of dipole and quadrupole moments         
+    babel                Openbabel wrapper - conversion of coordinate files
+    cc_opt               Analysis of geom. opt. or relaxed scan            
+    cc_check             Check if a logfile can be parsed with cclib       
+    extract_molden       Extract hole/particle parts from Molden file      
+    spectrum             Convoluted spectrum from analyze_tden output      
+    tden_ov              Transition density matrix overlap                 
+    convert_table        Convert the output to latex/html table            
+    dgrid_prep           Prepare input for DGrid                           
+    fcd                  Fragment charge difference analysis     
+\end{Verbatim}
+\normalsize
+
+\begin{itemize}
+\item The first part of the header shows the main information about the program and version.
+\item The second part provides literature references (these are adjusted specifically to the modules called).
+\item In the third part all possible scripts are shown. The main ones are \texttt{theoinp} for input generation; \texttt{analyze\_tden} and \texttt{analyze\_sden} to drive the analyses.
+\end{itemize}
+
+To obtain information about a specific script and its input arguments, run for example
+
+\comm{theodore analyze\_nos}
+
+\scriptsize
+\begin{Verbatim}[commandchars=\\\{\}]
+================================================================================
+|                                 TheoDORE 3.0                                 |
+|         Theoretical Density, Orbital Relaxation and Exciton analysis         |
+|                                                                              |
+|                            Author: Felix Plasser                             |
+|             Contributions by: L. Stojanovic, G. Hermann, S. Mai,             |
+|                          M.F.S.J. Menger, P. Kimber                          |
+--------------------------------------------------------------------------------
+|                       References for the modules used                        |
+|        (see also http://theodore-qc.sourceforge.net/literature.html)         |
+|                                                                              |
+|   Program citation:                                                          |
+|     F. Plasser, J. Chem. Phys. (2020), 152, 084108.                          |
+================================================================================
+
+  positional arguments:
+  ---------------------------------------------------
+    no_files             | List of NO files in Molden format                 
+
+  optional arguments:
+  ---------------------------------------------------
+    -h/--help            | show this help message and exit                   
+    -f/--ifile           | Input file (optional)                             
+    -r/--ref             | Reference MO file for computing AO overlap matrix 
+    -o/--occ_fac         | Multiply occupations with this factor             
+    -u/--unrestricted    | Use if unrestricted orbitals are present; Default=
+                         | False, if set value=True                          
+    -e/--rd_ene          | Interpret energies as occupations; Default=False, 
+                         | if set value=True                                 
+
+usage: /PhotoChem/programs/TheoDORE/Versions/TheoDORE_3.0/bin/theodore ... analyze_nos [-h] [-f ifile] [-r ref] [-o occ_fac] [-u] [-e] no_files [no_files ...] 
+
+Analysis of natural orbital (NO) files
+\end{Verbatim}
+\normalsize
+
+\begin{itemize}
+\item The last line shows what the script does: ``Analysis of natural orbital (NO) files''
+\item Arguments and keywords are shown above
+\item A summary of all scripts is given here:\\
+\url{https://theodore-qc.sourceforge.io/docs/usage.html}
+\end{itemize}
+
+\clearpage
+\section{Natural transition orbitals (Turbomole)}
+
+As a first step, we will plot the natural transition orbitals (NTOs) in the case of the formaldehyde dimer computed with RI-CC2 in \textsc{Turbomole}.
+
+\subsection{Input generation}
+\label{sec:inpnto}
+
+The input files are taken from the \texttt{EXAMPLES} directory in the \theo{} distribution
+
+\comm{cp -r \$THEODIR/EXAMPLES/STANDARD/fa2.ricc2/QC\_FILES/ fa2.tutorial} \\
+
+Inside the \texttt{fa2.tutorial} directory, run the input program
+
+\comm{theodore theoinp}
+
+\scriptsize
+\begin{Verbatim}[commandchars=\\\{\}]
+Type of job (rtype):
+  [ 1]      qcadc - Q-Chem ADC (libwfa output)
+  [ 2]     libwfa - General libwfa output
+  [ 3]    qctddft - Q-Chem TDDFT
+  [ 4]       fchk - Q-Chem fchk file
+  [ 5]   colmcscf - Columbus MCSCF
+  [ 6]    colmrci - Columbus MR-CI (tden analysis)
+  [ 7]      rassi - Molcas RASSI
+  [ 8]        nos - Read natural orbitals (Molden format) for sden analysis: Columbus, Molcas, ...
+  [ 9]      ricc2 - Turbomole ricc2
+  [10]       escf - Turbomole escf
+  [11]   terachem - Terachem (TDDFT)
+  [12]      cclib - Use external cclib library: Gaussian, GAMESS, ...
+  [13]       orca - ORCA TDDFT (using a Molden file and cclib)
+  [14]        adf - ADF (TDDFT)
+  [15]     tddftb - DFTB+ - TDDFTB
+  [16]    dftmrci - DFT/MRCI
+  [17]     onetep - ONETEP
+Choice: [9]  \redl{9 <ENTER>} \comment{! \texttt{theoinp} tries to guess the program used according to the files present}
+
+Main file to read (rfile):
+Choice (autocomplete enabled): [ricc2.out] \redl{<ENTER>}
+
+Read binary CCRE0 files? (read_binary):
+Choice (y/n): [n] \redl{<ENTER>} \comment{! \texttt{CCRE0} files are not available in this example.}
+\comment{! Otherwise binary files are recommended when available.}
+
+ *** Warning: in the case of ricc2 you have to delete the line
+       implicit core=   x virt=    x
+     from the control file before running tm2molden.
+ \comment{! Everything works here but in general one should remember this when using \texttt{ricc2}}
+
+MO file (Molden format)
+ -> This file should ideally contain a square invertible coefficient matrix (mo_file):
+Choice (autocomplete enabled): [molden.input] \redl{<ENTER>}
+
+Analysis of transition density matrices?
+Choice (y/n): [y] \redl{<ENTER>}
+
+Perform CT number analysis?
+Choice (y/n): [y] \redl{n <ENTER>} \comment{! Do not perform a charge transfer number analysis to keep things simple}
+
+Perform natural transition orbital (NTO) analysis? (comp_ntos):
+Choice (y/n): [y] \redl{<ENTER>}
+
+Perform analysis of domain NTOs and conditional densities? (comp_dntos):
+Choice (y/n): [n] \redl{<ENTER>} \comment{! See section 7}
+
+NTOs as Jmol script? (jmol_orbitals):
+Choice (y/n): [y] \redl{y <ENTER>} \comment{! Type "y" if you have the \textsc{Jmol} program available}
+
+NTOs in Molden format (molden_orbitals):
+Choice (y/n): [n] \redl{y <ENTER>} \comment{! Type "y" if you want files in \textsc{Molden} format}
+
+Use alpha/beta rather then negative/positive to code for hole/particle orbitals? (alphabeta):
+Choice (y/n): [n] \redl{n <ENTER>} \comment{! Only for special applications}
+
+NTOs in Cube file format (requires orbkit) (cube_orbitals):
+Choice (y/n): [n] \redl{<ENTER>} \comment{! This option appears only when orbkit is installed}
+
+Calculation of Particle/Hole density (requires orbkit)? (comp_p_h_dens):
+Choice (y/n): [n] \redl{<ENTER>} \comment{! Only with orbkit}
+
+Calculation of transition densities between ground state and excited states (requires orbkit) (comp_rho0n):
+Choice (y/n): [n] \redl{<ENTER>} \comment{! Only with orbkit}
+
+Perform exciton analysis?
+Choice (y/n): [y] \redl{n <ENTER>}
+
+Adjust detailed output options?
+Choice (y/n): [n] \redl{<ENTER>}
+
+Name of input file
+Choice: [dens_ana.in] \redl{<ENTER>}
+Finished: File dens_ana.in written.
+\end{Verbatim}
+\normalsize
+
+After going through these steps, the file \texttt{dens\_ana.in} with the following content is written:
+
+\scriptsize
+\begin{Verbatim}[commandchars=\\\{\}]
+rtype='ricc2'
+rfile='ricc2.out'
+read_binary=False
+mo_file='molden.input'
+comp_ntos=True
+comp_dntos=False
+jmol_orbitals=True
+molden_orbitals=True
+alphabeta=False
+cube_orbitals=False
+comp_p_h_dens=False
+comp_rho0n=False
+prop_list=['PRNTO', 'Z_HE']
+\end{Verbatim}
+\normalsize
+
+\greybox{To learn more about the available keywords check:\\
+\url{https://sourceforge.net/p/theodore-qc/wiki/Keywords/}
+}
+
+
+\subsection{Transition density matrix (1TDM) analysis}
+
+To run the 1TDM analysis to produce the NTOs, simply type:
+
+\comm{theodore analyze\_tden}
+
+After some technical information, you will find the following output summary
+
+\scriptsize
+\begin{Verbatim}[commandchars=\\\{\}]
+state       dE(eV)     f  PRNTO   Z_HE \comment{! label of the state / exc. energy / osc. strength / NTO participation ratio}
+-------------------------------------- \comment{  / effective no. entangled states}
+1(1)a       4.174  0.000  1.943  2.000
+2(1)a       4.192  0.000  1.952  1.999
+3(1)a       7.944  0.000  1.849  1.937
+4(1)a       8.021  0.164  1.882  1.958
+5(1)a       8.755  0.000  1.991  2.012
+6(1)a       8.763  0.052  1.998  2.015
+\end{Verbatim}
+\normalsize
+
+
+\subsection{Plotting of the orbitals}
+
+If you selected to export files in \textsc{Molden} format, one file for each individual state will be present
+
+\scriptsize
+\begin{Verbatim}[commandchars=\\\{\}]
+nto_1-1-a.mld  nto_2-1-a.mld  nto_3-1-a.mld  nto_4-1-a.mld  nto_5-1-a.mld  nto_6-1-a.mld
+\end{Verbatim}
+\normalsize
+
+You can visualize them with any program of your choice.
+
+In the case of using \textsc{Jmol} a shortcut is available.
+To plot all the orbitals in one go, simply type
+
+\comm{jmol -n nto\_jmol.spt}
+
+Then \textsc{Jmol} will create \texttt{.png} files for all the orbitals.
+To look at all these orbitals at once open the file \texttt{nto.html} in a browser, as shown in Fig.~\ref{fig:fa2}.
+
+\begin{figure}
+\begin{tabular}{|ccl|}
+\hline
+\textbf{1-1-a} &&\comment{! state label}\\
+\comment{! hole/occupied NTO} & \comment{! particle/virtual NTO}&\\
+\incmo{fa2/NTO1-1-a_1o_56.png} & \incmo{fa2/NTO1-1-a_1v_56.png} &\\
+0.556 & 0.556 & \comment{! NTO amplitudes $\lambda_i$}\\
+\incmo{fa2/NTO1-1-a_2o_39.png} & \incmo{fa2/NTO1-1-a_2v_39.png} &\\
+0.394 & 0.394&\\
+\hline
+\textbf{2-1-a}&&\\
+\incmo{fa2/NTO2-1-a_1o_56.png} & \incmo{fa2/NTO2-1-a_1v_56.png} &\\
+0.556 & 0.556 &\\
+\incmo{fa2/NTO2-1-a_2o_41.png} & \incmo{fa2/NTO2-1-a_2v_41.png} &\\
+0.405 & 0.405&\\
+\hline
+\end{tabular}
+\caption{NTOs for the formaldehyde dimer.}
+\label{fig:fa2}
+\end{figure}
+
+\greybox{In both cases two NTO pairs are required to describe the transition, in agreement with $\mathrm{PR_{NTO}}\approx 2$.
+This is a general observation for excitonic states in interacting chromophores, see Ref.~\cite{Entang} for further discussion and references.}
+\\
+\textit{Technical note:} To get the precise pictures shown here, modify the \texttt{nto\_jmol.spt} script
+\scriptsize
+\begin{Verbatim}[commandchars=\\\{\}]
+load molden.input FILTER "nosort"                                                                                                    
+mo titleformat "" 
+rotate x 90 \comment{! add}
+rotate y 10 \comment{! add}
+...
+\end{Verbatim}
+\normalsize
+
+\clearpage
+
+\section{Charge transfer number and exciton analysis (Turbomole)}
+In this part an analysis of the charge transfer numbers is carried out.
+This requires dividing the system into fragments, which are analyzed together.
+Choosing which atoms are grouped into individual fragments and how these fragments are arranged is the first critical step in the charge transfer number analysis. Special care has to be taken when choosing these fragments, and it is often necessary to try different settings.
+
+\subsection{Input generation}
+\label{sec:inpct}
+First, it is helpful to look at the molecule using a molecular structure editor (e.g. Avogadro) and display the atom lables.
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[trim=1cm 2cm 1cm 2cm, clip=true, scale=1]{fa2/fa2avo.png}
+\caption{Atom numbering in the formaldehyde dimer.}
+\label{fig:fanrs}
+\end{center}
+\end{figure}
+
+In the present simple case we want to divide our molecule into two fragments, one for each molecule.
+One fragment will contain the atom indices 1,3,5,7 the other one 2,4,6,8.
+
+After deciding on the fragment definition run 
+
+\comm{theodore theoinp}
+
+And start out the same as in Section~\ref{sec:inpnto}. Then continue:
+
+\scriptsize
+\begin{Verbatim}[commandchars=\\\{\}]
+Perform CT number analysis?
+Choice (y/n): [y] \redl{y <ENTER>} \comment{! This time we want to do the CT number analysis}
+
+Mode for specifying molecular fragments (at_lists):
+  [ 1] Manual input
+  [ 2] Automatic generation by fragment (using python-openbabel)
+  [ 3] Automatic generation for transition metal complexes (using python-openbabel)
+  [ 4] Mixed manual/automatic generation (using python-openbabel)
+  [ 5] Automatic generation by element (using python-openbabel)
+  [ 6] Leave empty and fill out later
+Choice: \redl{1 <ENTER>} \comment{! We use "Manual input" here, for other options see Section \ref{sec:advinp}}
+
+Input the indices of the atoms belonging to fragment 1:
+(separated by spaces)
+Choice: \redl{1 3 5 7 <ENTER>} \comment{! Atom indices according to Figure \ref{fig:fanrs}}
+
+Input the indices of the atoms belonging to fragment 2:
+(separated by spaces)
+Choice: \redl{2 4 6 8 <ENTER>}
+
+Input the indices of the atoms belonging to fragment 3:
+(separated by spaces)
+Choice:\redl{<ENTER>} \comment{! Leave empty to quit}
+
+Checking whether the at_lists definition is valid ...
+at_lists= [[1, 3, 5, 7], [2, 4, 6, 8]]
+  2 lists with individual numbers of entries:
+[4, 4] \comment{! Two fragments with four atoms each}
+  8 total entries, with maximal value 8
+
+Formula for Omega matrix computation
+   0 - simple, 1 - Mulliken, 2 - Lowdin (Om_formula):
+Choice: [2] \redl{<ENTER>}
+
+Omega descriptors to be computed:
+  [ 1] Standard set
+  [ 2] Transition metal complex
+  [ 3] None
+Choice: [1]\redl{<ENTER>}
+
+Print-out of electron/hole populations
+  [ 1] None
+  [ 2] For fragments
+  [ 3] For fragments and individual atoms
+Choice: [1]\redl{1 <ENTER>} \comment{! for the symmetric case this analysis does not really help}
+
+Perform natural transition orbital (NTO) analysis?
+Choice (y/n): [y] \redl{n <ENTER>} \comment{! already did that before ...}
+
+Perform analysis of domain NTOs and conditional densities? (comp_dntos):
+Choice (y/n): [n] \redl{<ENTER>}
+
+Calculation of transition densities between ground state and excited states (requires orbkit) (comp_rho0n):
+Choice (y/n): [n] \redl{<ENTER>}
+
+Perform exciton analysis?
+Choice (y/n): [y] \redl{<ENTER>} \comment{! Let's do the exciton analysis here, as well}
+
+Compute approximate exciton size?
+Choice (y/n): [y] \redl{<ENTER>}
+
+Adjust detailed output options?
+Choice (y/n): [n] \redl{<ENTER>}
+
+Name of input file
+Choice: [dens_ana.in] \redl{<ENTER>}
+\end{Verbatim}
+\normalsize
+%
+\subsection{Transition density matrix (1TDM) analysis}
+
+Again run:
+
+\comm{theodore analyze\_tden}
+
+\clearpage
+Now, a more extended print-out is available:
+
+\scriptsize
+\begin{Verbatim}[commandchars=\\\{\}]
+state       dE(eV)    f     Om    POS     PR     CT    COH   CTnt  RMSeh
+-------------------------------------------------------------------------
+1(1)a       4.174  0.000  0.950  1.500  2.000  0.027  1.056  0.000  1.237
+2(1)a       4.192  0.000  0.961  1.500  2.000  0.032  1.067 -0.000  1.248
+3(1)a       7.944  0.000  0.971  1.500  2.000  0.167  1.385  0.000  2.107
+4(1)a       8.021  0.164  0.968  1.500  2.000  0.198  1.467 -0.000  2.186
+5(1)a       8.755  0.000  0.973  1.500  2.000  0.851  1.341 -0.000  3.433
+6(1)a       8.763  0.052  0.973  1.500  2.000  0.816  1.429  0.000  3.378
+\end{Verbatim}
+\normalsize
+
+The meaning of these values is discussed in Refs~\cite{DMAT, DMAT_ADC_II} and at the \href{https://sourceforge.net/p/theodore-qc/wiki/Transition density matrix analysis/}{documentation wiki}. Only a brief explanation shall be given here:
+
+\begin{itemize}
+\item
+In the case of using \texttt{ricc2} the first value \texttt{Om} or $\Omega$ is just a normalization factor.
+In cases, where an exact 1TDM is available, this is the one-electron excitation character.
+\item
+The values POS=1.500 and PR=2.000 in all cases mean that the excitation is distributed evenly between fragment 1 and fragment 2 (for symmetry reasons)
+\item
+The crucial information lies in the CT value. CT$\approx 0$ for the first four excited states, meaning that these are mostly coupled local excitations (Frenkel excitons). For the last two states CT is greater than 0.8 indicating that these are charge resonance states.
+\item
+The trend in the CT values is also reflected by the (approximated) root-mean square electron-hole separation (RMSeh, also denoted $\tilde{d}_{exc}$) given in \AA~\cite{PPV_Steffi}.
+This value is is about equal to the intermolecular separation of 3.5~\AA{} in the case of the charge resonance states while it is significantly smaller for the locally excited states.
+\end{itemize}
+
+\subsection{Electron-hole correlation plots}
+Electron-hole correlation plots are pseudocolor matrix plots representing the charge-transfer numbers $\Omega_{AB}$.
+To create electron-hole correlation plots, run
+
+\comm{theodore plot\_omfrag}
+
+Simply use all default values and then look at \texttt{OmFrag.html} in a browser (Fig.~\ref{fig:fa2_eh}).\\
+
+\begin{figure}
+\begin{tabular}{|cccc|}
+\hline
+\multicolumn{4}{|l|}{\textbf{Electron-hole correlation plots of the Omega matrices for the}}\\
+\multicolumn{4}{|l|}{\textbf{individual states.}}\\
+\incom{fa2/pcolor_11a.png}&
+\incom{fa2/pcolor_21a.png}&
+\incom{fa2/pcolor_31a.png}&
+\incom{fa2/pcolor_41a.png}\\
+1(1)a & 2(1)a & 3(1)a & 4(1)a\\
+\incom{fa2/pcolor_51a.png}&
+\incom{fa2/pcolor_61a.png}&
+\incom{fa2/axes.png}&
+\\
+5(1)a & 6(1)a & Axes/Scale & \\
+\hline
+\end{tabular} \\
+\caption{Electron-hole correlation plots for the formaldehyde dimer.}
+\label{fig:fa2_eh}
+\end{figure}
+
+Here, the results are rather trivial since there are only two fragments in the calculation, which are equivalent for symmetry reasons.
+The locally excited (Frenkel) states are represented by black boxes on the main diagonal (going from lower left to upper right) while the charge resonance states are distinguished by off-diagonal contributions.
+Note, however, that distinguishing between Frenkel and charge resonance states without these tools is quite challenging.
+
+\section{Interface to the external cclib library (\textsc{Gaussian~09})}
+\textsc{Gaussian}, GAMESS, \textsc{Orca}, and some other programs can be parsed through the cclib library \cite{cclib}.
+cclib is included in the default installation.
+The present example also uses the \texttt{python-openbabel} package for automatic input generation (but you can also use the manual input mode from the previous example).
+
+Start by copying the relevant files
+
+\comm{cp -r \$THEODIR/EXAMPLES/CCLIB/fa2.cclib/QC\_FILES/ fa2.cclib.tutorial}
+
+\subsection{Check the log file}
+When using cclib, one should start by checking whether the file can be parsed correctly
+
+\comm{theodore cc\_check gaussian.log}
+
+\scriptsize
+\begin{Verbatim}[commandchars=\\\{\}]
+...
+Essential attributes:
+       mocoeffs ... True
+      atombasis ... True
+          natom ... True
+          homos ... True
+     moenergies ... True
+     etenergies ... True
+         etsyms ... True
+         etsecs ... True
+
+Optional attributes:
+         etoscs ... True
+     aooverlaps ... False
+         mosyms ... True
+
+Attributes for structure parsing and creation of Molden file:
+         gbasis ... False \comment{! gbasis is missing - no \textsc{Molden} files}
+          natom ... True
+     atomcoords ... True
+        atomnos ... True
+
+
+ gaussian.log can be parsed by using rtype='cclib' in dens_ana.in.\comment{! this is the important part}
+ But conversion to Molden format is not possible
+\end{Verbatim}
+\normalsize
+
+\subsection{Input generation}
+As usual:
+
+\comm{theodore theoinp}
+
+\scriptsize
+\begin{Verbatim}[commandchars=\\\{\}]
+Type of job (rtype):
+  [ 1]      qcadc - Q-Chem ADC (libwfa output)
+  [ 2]     libwfa - General libwfa output
+  [ 3]    qctddft - Q-Chem TDDFT
+  [ 4]       fchk - Q-Chem fchk file
+  [ 5]   colmcscf - Columbus MCSCF
+  [ 6]    colmrci - Columbus MR-CI (tden analysis)
+  [ 7]      rassi - Molcas RASSI
+  [ 8]        nos - Read natural orbitals (Molden format) for sden analysis: Columbus, Molcas, ...
+  [ 9]      ricc2 - Turbomole ricc2
+  [10]       escf - Turbomole escf
+  [11]   terachem - Terachem (TDDFT)
+  [12]      cclib - Use external cclib library: Gaussian, GAMESS, ...
+  [13]       orca - ORCA TDDFT (using a Molden file and cclib)
+  [14]        adf - ADF (TDDFT)
+  [15]     tddftb - DFTB+ - TDDFTB
+  [16]    dftmrci - DFT/MRCI
+  [17]     onetep - ONETEP
+Choice: \rede{12}
+
+Main file to read (rfile):
+Choice (autocomplete enabled): \rede{gaussian.log}
+
+Note: If used in connection with ORBKIT it is preferable to have an externally generated Molden file.
+Do you have an externally generated Molden file?
+Choice (y/n): [n]\rede{}
+\comment{! If available a Molden file generated by Gaussian would be preferable but we do not need it here}
+
+Analysis of transition density matrices?
+Choice (y/n): [y]\rede{}
+
+Perform CT number analysis?
+Choice (y/n): [y]\rede{}
+Fragment definition for CT nubmer analysis
+
+Mode for specifying molecular fragments (at_lists):
+  [ 1] Manual input
+  [ 2] Automatic generation by fragment (using python-openbabel)
+  [ 3] Automatic generation for transition metal complexes (using python-openbabel)
+  [ 4] Mixed manual/automatic generation (using python-openbabel)
+  [ 5] Automatic generation by element (using python-openbabel)
+  [ 6] Leave empty and fill out later
+Choice:\rede{2} \comment{! since there are two well-separated molecules, we can use the automatic mode}
+
+Automatic generation of at_lists partitioning ...
+
+Coordinate file (coor_file):
+Choice (autocomplete enabled): \rede{gaussian.log} \comment{! simply take the log file}
+
+Format of coordinate file (coor_format):
+Choice: g09 \comment{! format, as recongized by openbabel}
+\end{Verbatim}
+\normalsize
+
+\greybox{The relevant formats are:\\
+\textsc{Gaussian} - g03, g09\\
+\textsc{GAMESS} - gamout \\
+\textsc{Q-Chem} - qcout}
+
+\scriptsize
+\begin{Verbatim}[commandchars=\\\{\}]
+*** Fragment composition *** \comment{! Check that everything worked}
+  Fragment 1: C H2 O \comment{! This looks reasonable: two formaldehyde molecules}
+  Fragment 2: C H2 O
+
+Checking whether the at_lists definition is valid ...
+at_lists= [[1, 3, 5, 7], [2, 4, 6, 8]] \comment{! correct indices}
+  2 lists with individual numbers of entries:
+[4, 4]
+  8 total entries, with maximal value 8
+  
+Formula for Omega matrix computation
+   0 - simple, 1 - Mulliken, 2 - Lowdin (Om_formula):
+Choice: [2] \rede{}
+
+Omega descriptors to be computed:
+  [ 1] Standard set
+  [ 2] Transition metal complex
+  [ 3] None
+Choice: [1] \rede{}
+
+Print-out of electron/hole populations
+  [ 1] None
+  [ 2] For fragments
+  [ 3] For fragments and individual atoms
+Choice: [1] \rede{2}
+
+Perform natural transition orbital (NTO) analysis?
+Choice (y/n): [y] \rede{n} \comment{! no possibility to visualize them if \textsc{Molden} export does not work}
+
+Perform analysis of domain NTOs and conditional densities? (comp_dntos):
+Choice (y/n): [n] \rede{}
+
+Calculation of transition densities between ground state and excited states (requires orbkit) (comp_rho0n):
+Choice (y/n): [n] \rede{}
+
+Perform exciton analysis?
+Choice (y/n): [y] \rede{}
+
+Compute approximate exciton size?
+Choice (y/n): [y] \rede{}
+
+Adjust detailed output options?
+Choice (y/n): [n] \rede{}
+
+Name of input file
+Choice: [dens_ana.in] \rede{}
+Finished: File dens_ana.in written.
+\end{Verbatim}
+\normalsize
+
+The following file \texttt{dens\_ana.in} was created:
+
+\scriptsize
+\begin{Verbatim}[commandchars=\\\{\}]
+rtype='cclib'
+rfile='gaussian.log'
+coor_file='gaussian.log'
+coor_format='log'
+at_lists=[[1, 3, 5, 7], [2, 4, 6, 8]]
+Om_formula=2
+eh_pop=1
+comp_ntos=False
+comp_dntos=False
+comp_ntos=False
+comp_rho0n=False
+prop_list=['Om', 'POS', 'PR', 'CT', 'COH', 'CTnt', 'RMSeh']
+\end{Verbatim}
+\normalsize
+
+\subsection{Transition density matrix (1TDM) analysis}
+Again run:
+
+\comm{theodore analyze\_tden}
+
+The output looks similar as it did before only that at the TDDFT/PBE level the CT states are lower in energy and the separation between local and CT states is not as clear cut.
+
+\scriptsize
+\begin{Verbatim}[commandchars=\\\{\}]
+state       dE(eV)    f     Om    POS     PR     CT    COH   CTnt  RMSeh
+-------------------------------------------------------------------------
+1SingA2     3.583  0.000  1.000  1.500  2.000  0.697  1.730  0.000  3.111
+2SingB1     3.635  0.000  1.000  1.500  2.000  0.736  1.635  0.000  3.187
+3SingB1     4.242  0.000  1.001  1.500  2.000  0.263  1.634  0.000  2.090
+4SingA2     4.284  0.000  1.001  1.500  2.000  0.302  1.729 -0.000  2.202
+5SingB2     7.793  0.011  1.001  1.500  2.000  0.956  1.091  0.000  3.531
+6SingA1     7.851  0.001  1.000  1.500  2.000  0.991  1.019  0.000  3.589
+...
+\end{Verbatim}
+\normalsize
+
+
+\section{Advanced fragment input and double excitations (Columbus)}
+\label{sec:advinp}
+
+The secure way for fragment definition is always the manual mode described in Section~\ref{sec:inpnto}.
+In some cases, i.e. when the fragments of interest are separate molecules, one can use the option ``Automatic generation from coordinate file'' in \texttt{theoinp}.
+A more sophisticated method for automatic fragment definition is described in the next section.
+This method relies on the \textsc{Avogadro} molecular structure editor and the availability of the \texttt{python-openbabel} package.
+
+This method is described in the next two sections.
+If you just wish to run the job without the input generation, copy the \texttt{dens\_ana.in file} given at the bottom of Section~\ref{sec:inpcol}.
+
+Take the input files from the \texttt{EXAMPLES} directory in the \theo{} distribution
+
+\comm{cp -r \$THEODIR/EXAMPLES/STANDARD/hexatriene.colmrci/QC\_FILES/ hexatriene.tutorial} \\
+
+\subsection{Fragment preparation using Avogadro}
+
+First the \texttt{geom} file in \textsc{Columbus} format has to be converted to the more common xyz format.
+
+\comm{theodore babel geom geom.xyz}
+
+\greybox{This step is specific for \textsc{Columbus}. In many other cases \textsc{Avogadro} can directly read the structure file or logfile.}
+
+This file can be opened with \textsc{Avogadro}
+
+\comm{avogadro geom.xyz}
+
+In \textsc{Avogadro} the following steps have to be performed (Figure~\ref{fig:avo})
+
+\begin{enumerate}
+\item
+Click the pen (draw tool)
+\item
+Uncheck ``Adjust Hydrogens''
+\item
+Right-click the bonds that you wish to delete to divide the molecule into fragments
+\item
+Save the file as \texttt{geom.mol} \comment{! use a structure format with explicit bonds}
+\end{enumerate}
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[trim=0cm 0cm 0.1cm 0cm, clip=true, scale=0.5]{avo_instructions.png}
+\caption{Fragment definition using \textsc{Avogadro}.}
+\label{fig:avo}
+\end{center}
+\end{figure}
+
+\subsection{Input generation}
+\label{sec:inpcol}
+Now run \texttt{theoinp} using the newly created \texttt{geom.mol} file as a template.
+
+\comm{theodore theoinp}
+
+\scriptsize
+\begin{Verbatim}[commandchars=\\\{\}]
+Type of job (rtype):
+  [ 1]      qcadc - Q-Chem ADC (libwfa output)
+  [ 2]     libwfa - General libwfa output
+  [ 3]    qctddft - Q-Chem TDDFT
+  [ 4]       fchk - Q-Chem fchk file
+  [ 5]   colmcscf - Columbus MCSCF
+  [ 6]    colmrci - Columbus MR-CI (tden analysis)
+  [ 7]      rassi - Molcas RASSI
+...
+Choice: [6] \rede{}
+
+MO file (Molden format)
+ -> This file should ideally contain a square invertible coefficient matrix (mo_file):
+Choice (autocomplete enabled): [MOLDEN/molden_mo_mc.sp] \rede{}
+
+Analysis of transition density matrices?
+Choice (y/n): [y] \rede{}
+
+Perform CT number analysis?
+Choice (y/n): [y] \rede{y}
+Fragment definition for CT nubmer analysis
+
+Mode for specifying molecular fragments (at_lists):
+  [ 1] Manual input
+  [ 2] Automatic generation by fragment (using python-openbabel)
+  [ 3] Automatic generation for transition metal complexes (using python-openbabel)
+  [ 4] Mixed manual/automatic generation (using python-openbabel)
+  [ 5] Automatic generation by element (using python-openbabel)
+  [ 6] Leave empty and fill out later
+Choice: \rede{2} \comment{! use automatic generation if python-openbabel is available}
+Automatic generation of at_lists partitioning ...
+
+Coordinate file (coor_file):
+Choice (autocomplete enabled): [geom] \rede{geom.mol} \comment{! specify the newly created file}
+
+Format of coordinate file (coor_format):
+Choice: [mol] \rede{}
+
+*** Fragment composition ***
+  Fragment 1: C2 H3
+  Fragment 2: C2 H3
+  Fragment 3: C2 H2 \comment{! the central \ce{C2H2} fragment is at the end ...}
+\comment{  ! ... his has to be changed (see below)}
+Checking whether the at_lists definition is valid ...
+at_lists= [[1, 3, 7, 9, 11], [2, 4, 8, 10, 12], [5, 6, 13, 14]]
+  3 lists with individual numbers of entries:
+[5, 5, 4]
+  14 total entries, with maximal value 14
+
+Formula for Omega matrix computation
+   0 - simple, 1 - Mulliken, 2 - Lowdin (Om_formula):
+Choice: [2] \rede{}
+
+Omega descriptors to be computed:
+  [ 1] Standard set
+  [ 2] Transition metal complex
+  [ 3] None
+Choice: [1] \rede{}
+
+Print-out of electron/hole populations
+  [ 1] None
+  [ 2] For fragments
+  [ 3] For fragments and individual atoms
+Choice: [1] \rede{2}
+
+Perform natural transition orbital (NTO) analysis? (comp_ntos):
+Choice (y/n): [y] \rede{n}
+
+Perform analysis of domain NTOs and conditional densities? (comp_dntos):
+Choice (y/n): [n] \rede{}
+
+Calculation of transition densities between ground state and excited states (requires orbkit) (comp_rho0n):
+Choice (y/n): [n] \rede{}
+
+Perform exciton analysis?
+Choice (y/n): [y] \rede{n}
+
+Were there frozen core orbitals in the calculation?
+Choice (y/n): [y] \rede{n} \comment{! for general \textsc{Columbus} jobs frozen core orbitals would have to be specified here}
+
+Adjust detailed output options?
+Choice (y/n): [n] \rede{}
+
+Name of input file
+Choice: [dens_ana.in] \rede{}
+Finished: File dens_ana.in written.
+\end{Verbatim}
+\normalsize
+
+In the \texttt{dens\_ana.in} file, it is necessary to adjust the fragment definitions in \texttt{at\_lists} to make sure that the central \ce{C2H2} fragment is really in the middle.
+The file should look like this:
+
+\scriptsize
+\begin{Verbatim}[commandchars=\\\{\}]
+rtype="colmrci"
+mo_file="MOLDEN/molden_mo_mc.sp"
+coor_file="geom.mol"
+coor_format="mol"
+at_lists=[[1, 3, 7, 9, 11], [5, 6, 13, 14], [2, 4, 8, 10, 12]]
+Om_formula=2
+eh_pop=1
+comp_ntos=False
+comp_dntos=False
+comp_ntos=False
+comp_rho0n=False
+prop_list=["Om", "POS", "PR", "CT", "COH", "CTnt"]
+\end{Verbatim}
+\normalsize
+\vspace{-1em}
+\greybox{When using the automatic fragment definition, it is generally advisable to check the results using a graphical representation of the molecule (c.f. Figure~\ref{fig:avo}) and to adjust things if necessary.}
+\vspace{-1.5em}
+\subsection{Transition density matrix (1TDM) analysis}
+\vspace{-1em}
+As always:
+
+\comm{theodore analyze\_tden}
+
+\scriptsize
+\begin{Verbatim}[commandchars=\\\{\}]
+I2.1-2
+-------------------------------------------------------
+       Fragment        h+        e-       sum      diff
+-------------------------------------------------------
+         C2 H3    0.12852   0.11292   0.24144   0.01561
+         C2 H2    0.17536   0.20658   0.38194  -0.03122
+         C2 H3    0.12852   0.11292   0.24144   0.01561
+-------------------------------------------------------
+                  0.43241   0.43241   0.86482   0.00000
+-------------------------------------------------------
+
+File ehFrag.txt with information about e/h populations written.
+
+state       dE(eV)    f     Om    POS     PR     CT    COH   CTnt
+------------------------------------------------------------------
+I1.1-2      5.565  0.000  0.375  2.000  2.966  0.812  2.715  0.000
+I2.1-1      6.530  1.254  0.865  2.000  2.897  0.617  2.861  0.000
+I2.1-2      6.772  0.006  0.432  2.000  2.837  0.897  1.833 -0.000
+\end{Verbatim}
+\normalsize
+
+\greybox{The $\Omega$ value serves as a method-independent measure of double excitation character \cite{DMAT_ADC_II}. values close to one indicate single excitation character whereas $\Omega < 0.8$ shows (partial) doubly excited character.
+In the present case, the first and third states show predominant double excitation character $(\Omega<0.5)$.
+Note, that for low $\Omega$ values the 1TDM analysis does not provide a complete description and one might resort to the difference density matrix instead.}
+\clearpage
+
+\section{Fragment decomposition for a transition metal complex}
+A more compact representation for showing the different local and charge transfer contributions to an excited state has been worked out in Ref.~\cite{Fragments}.
+For this example, we are going to use a small Ir complex with three bidentate ligands. First get the files from the \texttt{EXAMPLES} directory:\\
+\comm{cp -r \$THEODIR/EXAMPLES/EXTRA/ir\_c3n3.qctddft/QC\_FILES/ ir\_c3n3.qctddft.tutorial} \\
+
+\subsection{Input generation}
+Call \comm{theodore theoinp}
+\scriptsize
+\begin{Verbatim}[commandchars=\\\{\}]
+Type of job (rtype):
+  [ 1]      qcadc - Q-Chem ADC (libwfa output)
+  [ 2]     libwfa - General libwfa output
+  [ 3]    qctddft - Q-Chem TDDFT
+  [ 4]       fchk - Q-Chem fchk file
+  [ 5]   colmcscf - Columbus MCSCF
+...
+Choice: [1] \rede{3}
+
+Main file to read (rfile):
+Choice (autocomplete enabled): [qchem.out] \rede{}
+
+Did you run "state_analysis=True"? (read_libwfa):
+Choice (y/n): [n] \rede{y}
+\comment{! We started with a state analysis (libwfa) in Q-Chem and are only post-processing results now.}
+
+Read TDA rather than full TDDFT results? (TDA):
+Choice (y/n): [n] \rede{}
+
+Analysis of transition density matrices?
+Choice (y/n): [y] \rede{}
+
+Perform CT number analysis?
+Choice (y/n): [y] \rede{}
+Fragment definition for CT nubmer analysis
+
+Mode for specifying molecular fragments (at_lists):
+  [ 1] Manual input
+  [ 2] Automatic generation by fragment (using python-openbabel)
+  [ 3] Automatic generation for transition metal complexes (using python-openbabel)
+  [ 4] Mixed manual/automatic generation (using python-openbabel)
+  [ 5] Automatic generation by element (using python-openbabel)
+  [ 6] Leave empty and fill out later
+Choice: \rede{3} \comment{! For transition metal complexes, openbabel can automatically distinguish between the metal centre} 
+                    \comment{and ligands provided you give the index of the metal centre.}
+\comment{! If openbabel is not activated, use option [6] and set up at_lists manually in dens_ana.in:}
+\comment{at_lists=[[1], [2, 6, 23, 7, 16, 15, 5, 14], [3, 12, 25, 13, 22, 20, 9, 21], [4, 19, 11, 18, 10, 17, 8, 24]]}
+Automatic generation of at_lists partitioning ...
+
+Coordinate file (coor_file):
+Choice (autocomplete enabled): [qchem.out] \rede{qchem.mol}
+Detected file type: mol
+
+Format of coordinate file (coor_format):
+Choice: [mol] \rede{}
+
+Input the index of the transition metal atom (or indices of the corresponding fragment)
+Choice: \rede{1} \comment{! In this case Ir is atom 1 (you can check this in avogadro)}
+
+*** Fragment composition ***
+  Fragment 1: Ir 
+  Fragment 2: C3 H4 N 
+  Fragment 3: C3 H4 N 
+  Fragment 4: C3 H4 N 
+
+Checking whether the at_lists definition is valid ...
+at_lists= [[1], [2, 23, 6, 16, 7, 5, 15, 14], [3, 25, 12, 22, 13, 9, 20, 21], [4, 11, 19, 10, 18, 17, 8, 24]]
+  4 lists with individual numbers of entries:
+[1, 8, 8, 8]
+  25 total entries, with maximal value 25
+
+Omega descriptors to be computed:
+  [ 1] Standard set
+  [ 2] Transition metal complex
+  [ 3] None
+Choice: [1] \rede{2} \comment{! Use special descriptors for TM complexes} 
+
+Print-out of electron/hole populations
+  [ 1] None
+  [ 2] For fragments
+  [ 3] For fragments and individual atoms
+Choice: [1] \rede{}
+
+Perform exciton analysis?
+Choice (y/n): [y] \rede{}
+
+Compute approximate exciton size?
+Choice (y/n): [y] \rede{}
+
+Molecular coordinates for exciton analysis:
+
+Coordinate file (coor_file):
+Choice (autocomplete enabled): [qchem.xyz] \rede{}
+
+Format of coordinate file (coor_format):
+Choice: [xyz] \rede{}
+
+Parse exciton information from libwfa analysis?
+Choice (y/n): [n] \rede{}
+
+Parse 1DDM exciton information from libwfa analysis?
+Choice (y/n): [n] \rede{}
+
+Adjust detailed output options?
+Choice (y/n): [n] \rede{}
+
+Name of input file
+Choice: [dens_ana.in] \rede{}
+Finished: File dens_ana.in written.
+
+\end{Verbatim}
+\normalsize
+
+\clearpage
+\subsection{Transition density matrix analysis and decomposition}
+Run \comm{theodore analyze\_tden}
+
+This gives the results for the first six excited states:
+\scriptsize
+\begin{Verbatim}[commandchars=\\\{\}]
+state       dE(eV)    f     Om   POSi   POSf     PR     CT     MC     LC   MLCT   LMCT   LLCT  RMSeh
+-----------------------------------------------------------------------------------------------------
+S_1         3.948  0.031  1.012  1.889  2.852  3.058  0.646  0.043  0.311  0.513  0.034  0.098  2.397
+S_2         3.999  0.035  1.013  1.948  2.910  2.653  0.586  0.098  0.316  0.465  0.052  0.069  2.249
+S_3         4.000  0.035  1.012  1.797  2.482  2.633  0.586  0.098  0.316  0.465  0.052  0.069  2.250
+S_4         4.408  0.040  1.004  1.650  2.436  2.498  0.788  0.075  0.136  0.569  0.032  0.187  2.685
+S_5         4.410  0.041  1.004  1.772  3.154  2.474  0.789  0.075  0.136  0.569  0.032  0.187  2.685
+S_6         4.426  0.008  1.004  1.705  2.651  3.011  0.753  0.112  0.134  0.535  0.053  0.166  2.621
+\end{Verbatim}
+\normalsize
+
+\greybox{The analysis shows that all states have around 50\% of MLCT character and varying amounts of LC and LLCT admixture.}
+
+The results for each state can now be decomposed into contributions from local excitations, MLCT and LLCT.
+
+Call \comm{theodore plot\_om\_bars}
+
+\scriptsize
+\begin{Verbatim}[commandchars=\\\{\}]
+Name of the file with the Omega matrix entries (OmFfile):
+Choice (autocomplete enabled): [OmFrag.txt] \rede{}
+
+Name of the file with the tden information (tdenfile):
+Choice (autocomplete enabled): [tden\_summ.txt] \rede{}
+
+Width of the plot (cm) (width):
+Choice: [7.000000] \rede{}
+Please enter the different excitation components to be plotted
+    - leave empty to finish
+
+Name of component 1 (e.g. MLCT or A\-B)
+Choice: \redl{MLCT <ENTER>}
+
+Color for plotting
+Choice: \redl{blue <ENTER>} \comment{! blue, green, yellow, red are available}
+
+ *** Fragment pairs belonging to MLCT ***
+  Enter two indices between 1 and 4, separated by spaces
+  Leave empty to finish
+
+Hole/electron indices for pair 1
+Choice: \redl{1 2 <ENTER>} \comment{! CT from metal to ligand 1}
+
+Hole/electron indices for pair 2
+Choice: \redl{1 3 <ENTER>} \comment{! CT from metal to ligand 2}
+
+Hole/electron indices for pair 3
+Choice: \redl{1 4 <ENTER>} \comment{! CT from metal to ligand 3}
+
+Hole/electron indices for pair 4
+Choice: \rede{} \comment{! Leave empty to switch to the next component}
+ ... switching to next component.
+ 
+Name of component 2 (e.g. MLCT or A-B)
+Choice: \redl{LMCT <ENTER>}  
+
+Color for plotting
+Choice: \redl{green <ENTER>}
+
+ *** Fragment pairs belonging to LMCT ***
+  Enter two indices between 1 and 4, separated by spaces
+  Leave empty to finish
+
+Hole/electron indices for pair 1
+Choice: \redl{2 1 <ENTER>} \comment{! CT from ligand 1 to metal}
+
+Hole/electron indices for pair 2
+Choice: \redl{3 1 <ENTER>}
+
+Hole/electron indices for pair 3
+Choice: \redl{4 1 <ENTER>}
+
+Hole/electron indices for pair 4
+Choice: \rede{}
+ ... switching to next component.
+
+Name of component 3 (e.g. MLCT or A-B)
+Choice: \redl{LC} \comment{! ligand-centred local excitations}
+
+Color for plotting
+Choice: \redl{red <ENTER>}
+
+ *** Fragment pairs belonging to LC ***
+  Enter two indices between 1 and 4, separated by spaces
+  Leave empty to finish
+
+Hole/electron indices for pair 1
+Choice: \redl{2 2 <ENTER>} \comment{! Local excitation on ligand 1}
+
+Hole/electron indices for pair 2
+Choice: \redl{3 3 <ENTER>}
+
+Hole/electron indices for pair 3
+Choice: \redl{4 4 <ENTER>}
+
+Hole/electron indices for pair 4
+Choice: \rede{}
+ ... switching to next component.
+ 
+Name of component 4 (e.g. MLCT or A-B)
+Choice: \redl{LLCT <ENTER>} \comment{! Ligand to ligand charge transfer}
+
+Color for plotting
+Choice: \redl{yellow}
+
+ *** Fragment pairs belonging to LLCT ***
+  Enter two indices between 1 and 4, separated by spaces
+  Leave empty to finish
+
+Hole/electron indices for pair 1
+Choice: \redl{2 3 <ENTER>}
+
+Hole/electron indices for pair 2
+Choice: \redl{2 4 <ENTER>} \comment{! We have contributions from each ligand to the two other ligands}
+
+Hole/electron indices for pair 3
+Choice: \redl{3 2 <ENTER>}
+
+Hole/electron indices for pair 4
+Choice: \redl{3 4 <ENTER>}
+
+Hole/electron indices for pair 5
+Choice: \redl{4 2 <ENTER>}
+
+Hole/electron indices for pair 6
+Choice: \redl{4 3 <ENTER>}
+
+Hole/electron indices for pair 7
+Choice: \rede{}
+ ... switching to next component.
+
+Name of component 5 (e.g. MLCT or A-B)
+Choice: \rede{} \comment{! Leave empty to finish}
+
+ ... component input finished.
+  File Om_bars.tex written.
+  -> Create plots using: pdflatex Om\_bars.tex
+\end{Verbatim}
+\normalsize
+
+As the end of the interactive script suggests, run:
+\comm{pdflatex Om\_bars.tex}
+
+Once this is finished, open the resulting pdf file using a suitable program e.g.:
+
+\comm{okular Om\_bars.pdf}
+
+The results of the decomposition are as shown:\\
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[trim=0.0cm 0.1cm 0.0cm 0cm, clip=true, scale=1]{Om_bars.png}
+\caption{The first six excited states for the Ir complex decomposed into contributions from MLCT, LMCT and local excitations on ligands}
+\label{fig:ombars}
+\end{center}
+\end{figure}
+\clearpage
+
+\section{Domain NTO and conditional density analysis}
+It is possible to visualise excited state correlation using \theo{}. This is done by plotting domain NTOs and conditional densities. The idea is the consider the excited state using an 'electron-hole' picture.
+A hole is fixed on a fragment of the molecule and the resulting conditional electron density is observed. Further explanation can be found in Ref~\cite{ExcCorr}. 
+This procedure generally works if it is possible to run \texttt{analyze\_tden.py} and there is a Molden file with orbital information.
+Exporting the densities as cube files requires \texttt{ORBKIT} which is not installed by default but is available from \url{https://github.com/felixplasser/orbkit}.
+
+Get the input files from the \texttt{EXAMPLES} directory\\
+\comm{cp -r \$THEODIR/EXAMPLES/STANDARD/naphth.fchk/QC\_FILES/ naphth.fchk.tutorial}
+
+From the tutorial folder, open the .xyz file with \textsc{Avogadro}, create fragments for the napthalene molecule and save it as a .mol file as done in Section \ref{sec:advinp}. 
+
+\includegraphics[trim=0cm 0cm 0.1cm 0cm, clip=true, scale=0.23]{naphth_frag.png}
+
+\greybox{In the present case, we want to separate two symmetry-unique CH groups from the remaining molecule.
+This allows us to view correlation effects between the individual atoms.}
+
+\clearpage
+\subsection{Input generation}
+Call \comm{theodore theoinp}
+\scriptsize
+\begin{Verbatim}[commandchars=\\\{\}]
+Type of job (rtype):
+  [ 1]      qcadc - Q-Chem ADC (libwfa output)
+  [ 2]     libwfa - General libwfa output
+  [ 3]    qctddft - Q-Chem TDDFT
+  [ 4]       fchk - Q-Chem fchk file
+  [ 5]   colmcscf - Columbus MCSCF
+  [ 6]    colmrci - Columbus MR-CI (tden analysis)
+...
+Choice: [4] \rede{}
+
+Main file to read (rfile):
+Choice (autocomplete enabled): [qchem.fchk] \rede{}
+
+Analysis of transition density matrices?
+Choice (y/n): [y] \rede{}
+
+Perform CT number analysis?
+Choice (y/n): [y] \rede{}
+Fragment definition for CT nubmer analysis
+
+Mode for specifying molecular fragments (at_lists):
+  [ 1] Manual input
+  [ 2] Automatic generation by fragment (using python-openbabel)
+  [ 3] Automatic generation for transition metal complexes (using python-openbabel)
+  [ 4] Mixed manual/automatic generation (using python-openbabel)
+  [ 5] Automatic generation by element (using python-openbabel)
+  [ 6] Leave empty and fill out later
+Choice: \redl{2 <ENTER>}
+\comment{! If you do not have python-openbabel use [6] and the at_lists shown later.}
+
+Coordinate file (coor_file):
+Choice (autocomplete enabled): [qchem.out] \redl{coord.mol <ENTER>} 
+Detected file type: mol
+
+Format of coordinate file (coor_format):
+Choice: [mol] \rede{} 
+
+*** Fragment composition ***
+  Fragment 1: C8 H6 
+  Fragment 2: C H 
+  Fragment 3: C H 
+
+Checking whether the at_lists definition is valid ...
+at_lists= [[1, 6, 2, 3, 9, 4, 10, 5, 11, 12, 7, 8, 13, 16], [14, 17], [15, 18]]
+  3 lists with individual numbers of entries:
+[14, 2, 2]
+  18 total entries, with maximal value 18
+
+Formula for Omega matrix computation
+   0 - simple, 1 - Mulliken, 2 - Lowdin (Om_formula):
+Choice: [2] \rede{}
+
+Omega descriptors to be computed:
+  [ 1] Standard set
+  [ 2] Transition metal complex
+  [ 3] None
+Choice: [1] \rede{}
+
+Print-out of electron/hole populations
+  [ 1] None
+  [ 2] For fragments
+  [ 3] For fragments and individual atoms
+Choice: [1] \rede{}
+
+Perform natural transition orbital (NTO) analysis? (comp_ntos):
+Choice (y/n): [y] \rede{}
+
+Perform analysis of domain NTOs and conditional densities? (comp_dntos):
+Choice (y/n): [n] \redl{y <ENTER>}
+
+NTOs as Jmol script? (jmol_orbitals):
+Choice (y/n): [y] \rede{}
+
+NTOs in Molden format (molden_orbitals):
+Choice (y/n): [n] \rede{}
+
+NTOs in Cube file format (requires orbkit) (cube_orbitals):
+Choice (y/n): [n] \redl{y <ENTER>}
+
+Create VMD Network for NTOs (vmd_ntos):
+Choice (y/n): [n] \rede{}
+
+Calculation of Particle/Hole density (requires orbkit)? (comp_p_h_dens):
+Choice (y/n): [n] \redl{y <ENTER>}
+
+Create VMD Network for p/h densities (vmd_ph_dens):
+Choice (y/n): [n] \rede{}
+
+Compute conditional densities as cube files?
+ 0 - no, 1 - hole, 2 - electron, 3 - both (comp_dnto_dens):
+Choice: [0] \redl{1 <ENTER>} \comment{! We are choosing to fix the hole on each fragment}
+                      \comment{! and observe the resulting conditional electron density}
+
+Write conditional densities to fchk file
+ 0 - no, 1 - hole, 2 - electron, 3 - both (fchk_dnto_dens):
+Choice: [0] \redl{1 <ENTER>} \comment{! Use this option if you want to view the result in IQMol}
+
+Calculation of transition densities between ground state and excited states (requires orbkit) (comp_rho0n):
+Choice (y/n): [n] \rede{}
+
+Number of CPUs for orbkit calculations (numproc):
+Choice: [4] \redl{2 <ENTER>} \comment{! naphthalene is relatively small - 2 CPUs should be enough} 
+
+Perform exciton analysis?
+Choice (y/n): [y] \redl{n <ENTER>}
+
+Adjust detailed output options?
+Choice (y/n): [n] \rede{}
+
+Name of input file
+Choice: [dens_ana.in] \rede{} 
+\end{Verbatim}
+\normalsize
+
+The following should be written to the dens{\_}ana.in file:
+\scriptsize
+\begin{Verbatim}[commandchars=\\\{\}]
+rtype='fchk'
+rfile='qchem.fchk'
+coor_file='coord.mol'
+coor_format='mol'
+at_lists=[[1, 6, 2, 3, 9, 4, 10, 5, 11, 12, 7, 8, 13, 16], [14, 17], [15, 18]]
+Om_formula=2
+eh_pop=0
+comp_ntos=True
+comp_dntos=True
+jmol_orbitals=True
+molden_orbitals=False
+cube_orbitals=True
+vmd_ntos=False
+comp_p_h_dens=True
+vmd_ph_dens=False
+comp_dnto_dens=1
+fchk_dnto_dens=1
+comp_rho0n=False
+numproc=2
+prop_list=['Om', 'POS', 'PR', 'CT', 'COH', 'CTnt', 'PRNTO', 'Z_HE']
+\end{Verbatim}
+\normalsize
+
+\subsection{Transition density matrix analysis}
+Now call:
+\comm{theodore analyze\_tden}
+
+TheoDORE writes cube files according to, for this three fragment example, the hole being on fragment 1, 2 or 3.
+
+The following states are printed out:
+
+\scriptsize
+\begin{Verbatim}[commandchars=\\\{\}]
+state       dE(eV)    f     Om    POS     PR     CT    COH   CTnt  PRNTO   Z_HE
+--------------------------------------------------------------------------------
+T_B3u_1     4.361      -  1.003  1.308  1.573  0.287  1.387  0.008  2.358  2.746
+T_B3u_2     5.176      -  1.005  1.284  1.502  0.356  1.508 -0.004  2.134  2.352
+S_B3u_1     5.401  0.000  1.004  1.284  1.503  0.358  1.514  0.003  2.115  2.314
+S_B3u_2     7.360  1.724  1.018  1.286  1.510  0.309  1.433  0.003  2.314  3.047
+\end{Verbatim}
+\normalsize
+
+\subsection{Plotting of the orbitals}
+Using \textsc{Jmol}, the shortcuts used earlier are available to view the orbitals. Simply run:
+
+\comm{jmol -n dnto\_hole\_jmol.spt}
+\comm{jmol -n dnto\_elec\_jmol.spt}
+
+Then the results can be viewed by looking at the .html files in a browser.
+
+A more compact representation is obtained by processing the cube files generated via VMD. Run:\\
+\comm{theodore vmd\_plots rho*.cb}\\
+When prompted, do the following:
+\scriptsize
+\begin{Verbatim}[commandchars=\\\{\}]
+Compute volume integrals over cube files for isovalues? (do_vol):
+Choice (y/n): [n] \redl{y <ENTER>}
+
+Use special DNTO mode? (dnto):
+Choice (y/n): [n] \redl{y <ENTER>}
+
+Volume integral for conditional density (iso1):
+Choice: [0.750000] \rede{}
+
+Volume integral for probe density (iso2):
+Choice: [0.750000] \rede{}
+
+VMD Material for conditional density (mat1):
+Choice: [AOShiny] \rede{}
+
+VMD Material for probe density (mat2):
+Choice: [Glass1] \rede{}
+
+Width of images in output html file (width):
+Choice: [400] \rede{}
+
+Number of columns in the output html file (ncol):
+Choice: [4] \redl{4 <ENTER>} \comment{! This value should be one larger than the number of fragments you use}
+
+Adjust file names?
+Choice (y/n): [n] \rede{}
+\end{Verbatim}
+\normalsize
+
+The files required for visualisation will be created. Now do the following:
+
+\comm{vmd coord.xyz}
+
+Within \texttt{VMD}:
+\scriptsize
+\begin{Verbatim}[commandchars=\\\{\}]
+1.   File - Load Visualization State - load_all.vmd\\
+2.   Adjust the perspective\\
+3.   File - Load Visualization State - plot_all.vmd\\
+\end{Verbatim}
+\normalsize
+
+Close \texttt{VMD} and from call:
+\comm{bash convert.bash}
+
+Finally open the images in a web browser 
+\comm{firefox vmd\_plots.html}
+
+The key results you get for the naphthalene CH fragments as outlined in this tutorial are shown below. The red shading indicates the position of the hole. 
+
+\begin{tabular}{cccc}
+%\incrho{naphth/rho_p_S_B3u_1_hole-F01.png} & \incrho{naphth/rho_p_S_B3u_2_hole-F01.png} & \incrho{naphth/rho_p_T_B3u_1_hole-F01.png} & \incrho{naphth/rho_p_T_B3u_2_hole-F01.png} \\
+\incrho{naphth/rho_p_S_B3u_1_hole-F02.png} & \incrho{naphth/rho_p_S_B3u_2_hole-F02.png} & \incrho{naphth/rho_p_T_B3u_1_hole-F02.png} & \incrho{naphth/rho_p_T_B3u_2_hole-F02.png} \\
+\incrho{naphth/rho_p_S_B3u_1_hole-F03.png} & \incrho{naphth/rho_p_S_B3u_2_hole-F03.png} & \incrho{naphth/rho_p_T_B3u_1_hole-F03.png} & \incrho{naphth/rho_p_T_B3u_2_hole-F03.png}
+\end{tabular}
+
+\greybox{You can also use \textsc{PyMOL} to visualise the conditional densities but note that you need to change the .cb file ending to .cube . Plots can be created via the \textsc{qc\_pymol} toolkit: \url{https://github.com/felixplasser/qc_pymol} }
+\clearpage
+\section{Attachment/detachment analysis (Molcas - natural orbitals)}
+While the previous examples were focused on an analysis of the transition density matrices, TheoDORE can also analyze state- and difference-density matrices.
+These are most conveniently read in as natural orbital (NO) files in \textsc{Molden} format.
+The utility script \texttt{analyze\_nos} can be used as a shortcut for analyzing NO files.
+
+\greybox{Also standard RHF/UHF and DFT (RKS/UKS) orbitals can be analyzed with this mode.
+It is for example possible to compute the different density between a closed-shell RKS ground state and a UKS triplet or ionized state.}
+
+\subsection{NO analysis}
+Get the input files \\
+\comm{cp -r \$THEODIR/EXAMPLES/STANDARD/fa2.rassi/QC\_FILES/ fa2.rassi.tutorial}
+
+Then simply call
+
+\comm{theodore analyze\_nos -u MOLDEN.1 MOLDEN.2 MOLDEN.3}
+
+\greybox{The -u flag signifies unrestricted orbitals.
+Generally speaking the operation of analyze\_nos depends on the correct specification of input flags.
+Call ``theodore analyze\_nos'' without arguments to see a listing of the options.}
+
+\scriptsize
+\begin{Verbatim}[commandchars=\\\{\}]
+Mulliken populations \comment{! Analysis of the ground state}
+MOLDEN.1
+------------------------------------
+  Atom     state        nu      nunl
+------------------------------------
+  C  1   5.92413   0.10075   0.03645 \comment{! Gross population on the atom, and two measures for unpaired electrons}
+  C  2   5.92413   0.10075   0.03645
+  O  3   8.35389   0.10030   0.03601
+  O  4   8.35389   0.10030   0.03601
+...
+------------------------------------
+        32.00002   0.40234   0.14493 \comment{! Total number of electrons / unpaired electrons}
+------------------------------------
+
+MOLDEN.2
+--------------------------------------------------------
+  Atom     state        nu      nunl       det       att
+--------------------------------------------------------
+  C  1   6.04465   0.44212   0.49413   0.03847  -0.15898 \comment{! Also attachment/detachment populations}
+  C  2   6.04465   0.44212   0.49412   0.03847  -0.15898
+  O  3   8.28628   0.67712   0.71951   0.45914  -0.39152
+  O  4   8.28628   0.67712   0.71951   0.45914  -0.39152
+...
+--------------------------------------------------------
+        32.00000   2.34492   2.54684   1.10119  -1.10117 \comment{! sum: promotion number p}
+--------------------------------------------------------
+\end{Verbatim}
+\normalsize
+
+\scriptsize
+\begin{Verbatim}[commandchars=\\\{\}]
+Valence information \comment{! Valence analysis following Ref. \cite{Mayer_BO}}
+...
+
+Bond order information \comment{! Bond orders following Ref. \cite{Mayer_BO}}
+ <at1>-<at2> : <bond order>
+MOLDEN.1
+  1=3  : 1.6330 \comment{! Double bond between C=O}
+  1-5  : 0.9229
+  1-7  : 0.9229
+  2=4  : 1.6330
+  2-6  : 0.9229
+  2-8  : 0.9229
+MOLDEN.2
+  1-3  : 1.2048 \comment{! Bond order reduced in excited state}
+  1-5  : 0.9145
+  1-7  : 0.9145
+  2-4  : 1.2048
+  2-6  : 0.9145
+  2-8  : 0.9145
+\end{Verbatim}
+\normalsize
+
+\subsection{Plotting of the orbitals}
+In the case of using \textsc{Jmol}, you can use the automatic functionality for creating the natural difference orbitals (NDOs) or natural orbitals (NOs)
+
+\comm{jmol -n ndo\_jmol.spt}
+
+\greybox{The NDOs are in general similar to the NTOs, only that they also contain contributions from double excitations and orbital relaxation \cite{DMAT_ADC_II}.}
+
+\subsection{Alternative}
+
+It is also possible to perform the state-density analysis using
+
+\comm{theodore theoinp}
+
+and
+
+\comm{theodore analyze\_sden}
+
+\section{VIST plot for visualizing aromaticity}
+
+\textit{This section is still under construction but you can try running the basic commands.}
+
+Get the input files \\
+\comm{cp -r \$THEODIR/EXAMPLES/UTILS/BCyc\_VIST/QC\_FILES BCyc\_VIST.tutorial}
+
+\subsection{Simple example}
+\comm{theodore plot\_vist -p -o simple.vmd neutral.log}
+
+\subsection{More complicated example}
+\comm{theodore plot\_vist -c -v '0 4' neutral.log triplet.log 2M.log}
+
+\section{Contact}
+If you have any questions about this tutorial or about the \textsc{TheoDORE} program, please use the forum:
+
+\url{https://sourceforge.net/p/theodore-qc/discussion/bugs_questions/}
+
+You can also reach me via email: \texttt{f.plasser at lboro.ac.uk}
+
+\scriptsize
+\begin{Verbatim}[commandchars=\\\{\}]
+
+\end{Verbatim}
+\normalsize
+
+
+\begin{thebibliography}{9}
+\bibitem{Entang} F. Plasser \textit{JCP} \textbf{2016}, 144, 194107. \doi{10.1063/1.4949535}.
+\bibitem{DMAT} F. Plasser and H. Lischka \textit{JCTC} \textbf{2012}, 8, 2777. \doi{10.1021/ct300307c}.
+\bibitem{DMAT_ADC_II} F. Plasser, S. A. B\"appler, M. Wormit, A. Dreuw \textit{JCP} \textbf{2014}, 141, 024107. \doi{10.1063/1.4885820}
+\bibitem{cclib} N. M. O’boyle, A. L. Tenderholt, K. M. Langner \textit{J. Comput. Chem.} \textbf{2008}, 29, 839. \doi{10.1002/jcc.20823}
+\bibitem{PPV_Steffi} S. A. Mewes, J.-M. Mewes, A. Dreuw, F. Plasser \textit{PCCP} \textbf{2016}, 18, 2548. \doi{10.1039/C5CP07077E}
+\bibitem{Mayer_BO} I. Mayer \textit{IJQC} \textbf{1986}, 29, 477. \doi{10.1002/qua.560290108}
+\bibitem{Fragments} S. Mai, F. Plasser, J. Dorn, M. Fumanal, C. Daniel, L. Gonz\'{a}lez \textit{Coordination Chemistry Reviews} \textbf{2018}, 361, 74. \doi{10.1016/j.ccr.2018.01.019}
+\bibitem{ExcCorr} F. Plasser \textit{ChemPhotoChem} \textbf{2019}, 3, 702. \doi{10.1002/cptc.201900014}
+%\bibitem{Ircomp} F. Plasser and A. Dreuw \textit{JPCA} \doi{10.1021/jp5122917}.
+\end{thebibliography}
+
+\end{document}

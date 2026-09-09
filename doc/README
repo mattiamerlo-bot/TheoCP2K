@@ -1,0 +1,169 @@
+Download the newest TheoDORE release and tutorial.
+
+- VIST plots with Dalton
+- Unrestricted TDDFT with Turbomole
+- CASSCF with Orca
+- Improvements for spectrum.py
+- Update tools (colt, orbkit)
+
+TheoDORE 3.2.1
+- Include Q-Chem SF-TDDFT
+- Conditional densities for unrestricted calcs
+
+TheoDORE 3.2
+- Compute absorption cross section and extinction coefficient in spectrum.py
+- Updates for DFT/MRCI, including triplets
+- OpenMolcas input via: theodore theoinp -a
+- Standalone Orca interface
+- Fix for es2es
+- VIST plots for Turbomole
+
+TheoDORE 3.1.1
+- Fix for QTa values
+
+TheoDORE 3.1
+- Transition charges for ionic/covalent states
+- Fixes for Q-Chem EOM-CC and fchk
+- Fixes for Columbus, Turbomole
+
+TheoDORE 3.0
+- New user interface and documentation
+- LOC for ionic states (analyze_tden)
+- Analysis of unrestricted NOs (analyze_nos)
+- Improvement for VIST (plot_vist)
+- Jmol densities (jmol_mos)
+
+TheoDORE 3.0_alpha
+- New user interface and documentation
+- State-to-state TDM
+- Updated ADF interface
+- ONETEP interface
+- Update to analyze_nos
+- Excitation number, modified from [DOI: 10.1021/acs.jctc.7b00963]
+
+TheoDORE 2.4
+- Visualization of chemical shielding tensors (VIST) [DOI: 10.1002/ejoc.202100352]
+- New pytest verification system
+
+TheoDORE 2.3
+- Compute (unpaired) densities using orbkit
+- Fix for theo_test.bash
+- Fix for ORCA osc. strengths
+- Old RASSI interface removed (was not working properly)
+
+TheoDORE 2.2
+- Unrestricted computations in Orca (Sebastian Mai)
+- Substituent-induced electron localization (SIEL) [DOI: 10.1039/D0SC01684E]
+
+TheoDORE 2.1
+- Support for DFT/MRCI
+- Support for Q-Chem 5.2/5.3
+- De-excitation measure (Phe) [DOI: 10.1039/D0CP00369G]
+- Improvements in plot_Om_bars.py
+- Natural orbital analysis
+
+TheoDORE 2.0.2
+- Fix for runs without openbabel
+
+TheoDORE 2.0.1
+- Updated Orca interface
+- Support for all elements of the periodic table
+
+TheoDORE 2.0
+- Compatibility with TM >= 7.2
+- Some bugfixes related to python3
+
+TheoDORE 2.0_beta
+- Compatibility to python3 (Max Menger)
+- Conditional electron densities
+- Plot dipole and quadrupole moments (draw_moments.py)
+- Plot vibrations in Jmol (jmol_vibs.py)
+- Simple script for analyzing geometry optimiziations (cc_opt.py)
+- Support for fchk files from Q-Chem
+- Automatic plotting of state characters (plot_Om_bars.py)
+- Volume integrals for vmd_plots.py
+
+TheoDORE 1.7.2
+- Automatic fragment generation (analyze_correlations.py) by Sebastian Mai
+- Fix for ricc2 with symmetry + read_binary + Om_formula=2
+- Improved orbkit interface
+
+TheoDORE 1.7.1
+- ORCA: read binary file
+
+TheoDORE 1.7
+- Interface to orbkit for extended orbital/density plotting capabilities
+
+TheoDORE 1.6
+- Lowdin orthogonalization for CT numbers
+- Improved algorithm for Omega matrix computation
+- Support for spin-orbit coupled states (ADF)
+- DFTB+ interface (Ljiljana Stojanovic)
+- Improved support for Molcas/libwfa
+
+TheoDORE 1.5.1
+- New interface for ADF (reading only the TAPE21 file)
+
+TheoDORE 1.5
+- Interface to Newton-X (plot_graph_nx.py)
+- Interface to dgrid for plotting (dgrid_prep.py)
+- Interface to gnuplot (plot_graph.py)
+- Interface to VMD for plotting (vmd_plots.py)
+- New script for transition density matrix overlap
+- Restart option for analyze_tden.py
+- Minor bug fixes
+
+TheoDORE 1.4
+- Population analysis of MOs
+- Interface to Terachem
+- Parse libwfa output (parse_libwfa.py)
+- Support for MOLCAS/libwfa
+- Script for fragment decomposition (plot_frag_decomp.py)
+- More flexible spectrum generation (spectrum.py)
+
+TheoDORE 1.3
+- Interface for ADF
+- cclib taken as part of the distribution
+- Electron/hole entanglement entropy
+- Automatic fragment definition by element
+
+TheoDORE 1.2.2
+- Crucial bugfix for all cclib jobs
+
+TheoDORE 1.2.1
+- Fixes for Q-Chem and Turbomole read-out
+- Automatic file detection for babel.py
+
+TheoDORE 1.2
+- Extended output for e/h populations
+- Support for Q-Chem/CC computations
+- Fragment charge differences (experimental)
+- User input
+
+TheoDORE 1.1.4
+- Bugfix for e/h correlation plots
+
+TheoDORE 1.1.3
+- Create Molden files directly from cclib output
+- Enhanced exciton analysis
+- Support for Mayer bond order analysis
+- Add spectrum.py script for generating a convoluted spectrum
+- Improved print out
+
+TheoDORE 1.1.2
+- Support for MOLCAS rassi calculations
+- Some adjustments for Q-Chem 4.3
+- Fix for FIREFLY ECP computations
+
+TheoDORE 1.1.1
+- Improved output and graphics
+
+TheoDORE 1.1
+- Interface to cclib for parsing of ORCA, Gaussian, GAMESS and other programs
+- Parsing of binary files for ricc2 response vector read-out
+- New script plot_graph.py for convenient generation of graphs
+- New script convert_table.py for creating tables in LaTeX format
+- Additional Utility scripts
+
+TheoDORE 1.0
+- First release

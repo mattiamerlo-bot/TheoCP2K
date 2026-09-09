@@ -1,0 +1,11 @@
+#!/bin/sh
+set -eu
+
+APP_ROOT=${APPDIR:-$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)}
+CACHE_ROOT=${XDG_CACHE_HOME:-${HOME:-/tmp}/.cache}
+
+export PYTHONNOUSERSITE=1
+export MPLCONFIGDIR="$CACHE_ROOT/theocp2k/matplotlib"
+mkdir -p "$MPLCONFIGDIR" 2>/dev/null || true
+
+exec "$APP_ROOT/usr/bin/TheoCP2K" "$@"

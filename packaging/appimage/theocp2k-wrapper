@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+
+BIN_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+exec "$BIN_DIR/../lib/TheoCP2K/TheoCP2K" "$@"

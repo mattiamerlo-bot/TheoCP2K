@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=TheoCP2K
+GenericName=CP2K excited-state analyser
+Comment=Analyse CP2K TDDFPT output and NTO cube files
+Exec=TheoCP2K
+Icon=TheoCP2K
+Terminal=false
+Categories=Science;Education;
+Keywords=CP2K;TDDFPT;NTO;TheoDORE;chemistry;
+StartupNotify=true

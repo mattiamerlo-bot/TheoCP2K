@@ -1,0 +1,47 @@
+ CP2K| version string:                                       CP2K version 2025.2
+
+ MODULE QUICKSTEP: ATOMIC COORDINATES IN ANGSTROM
+
+   Atom Kind Element         X             Y             Z       Z(eff)     Mass
+      1    1 H     1      0.000000      0.000000      0.000000   1.0000   1.0079
+      2    1 H     1      1.587532      0.000000      0.000000   1.0000   1.0079
+
+ KERNEL| Spin symmetry of excitations                                    Singlet
+ TDDFPT| Number of states calculated                                           2
+
+    State    Exc. energy (eV)      Convergence (eV)
+        1       9.9999999             1.0000E+00
+        2       8.8888888             1.0000E+00
+
+ -  TDDFPT run converged in 4 iteration(s)
+
+ R-TDDFPT states of multiplicity 1
+ Transition dipoles calculated using length formulation
+
+         State    Excitation        Transition dipole (a.u.)        Oscillator
+         number   energy (eV)       x           y           z     strength (a.u.)
+         ------------------------------------------------------------------------
+ TDDFPT|      1       3.25000   1.0000E+00  0.0000E+00  0.0000E+00   1.23400E-01
+ TDDFPT|      2       4.75000   0.0000E+00  5.0000E-01  0.0000E+00   2.34500E-02
+
+ -                            Excitation analysis                              -
+        State             Occupied              Virtual             Excitation
+        number             orbital              orbital             amplitude
+             1   3.25000 eV
+                                 1                    2               0.950000
+                                 1                    3               0.100000
+             2   4.75000 eV
+                                 1                    3               0.900000
+
+ -                            Natural Orbital analysis                         -
+   STATE NR.      1             3.25000 eV
+     Particle-Hole state: 1   Spin:1     Eigenvalue: 0.90000   Sum Eigv: 0.90000
+     Particle-Hole state: 2   Spin:1     Eigenvalue: 0.08000   Sum Eigv: 0.98000
+   STATE NR.      2             4.75000 eV
+     Particle-Hole state: 1   Spin:1     Eigenvalue: 0.99000   Sum Eigv: 0.99000
+
+      Exciton descriptors from solving the TDDFT within the TDA:
+
+         n      c_n     d_eh [Å]     sigma_e [Å]     sigma_h [Å]   d_exc [Å]        R_eh
+         1    1.000       1.5000      0.5000      0.6000      1.7000      0.0100
+         2    1.000       0.2000      0.7000      0.8000      1.1000      0.2000
