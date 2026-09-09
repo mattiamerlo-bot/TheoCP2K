@@ -40,6 +40,7 @@ mkdir -p "$BUILD_DIR/pyinstaller-dist" "$BUILD_DIR/pyinstaller-work" "$APP_DIR/u
     --workpath "$BUILD_DIR/pyinstaller-work" \
     --specpath "$BUILD_DIR" \
     --hidden-import matplotlib.backends.backend_tkagg \
+    --hidden-import PIL._tkinter_finder \
     --hidden-import scipy.spatial._ckdtree \
     --hidden-import skimage.measure._marching_cubes_lewiner_cy \
     "$ROOT_DIR/packaging/appimage/launcher.py"
