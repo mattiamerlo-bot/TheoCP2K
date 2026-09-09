@@ -19,6 +19,8 @@ this implementation).
   `450 × 450 × 450` array into memory;
 - builds fragment hole→particle `Ω_AB` maps, classifies LE/CT/mixed states, and
   reports TheoDORE-style CT/PR/POS/COH descriptors;
+- stores completed Omega maps and their analysed descriptors inside version 2
+  project files and restores them when a project is reopened;
 - displays the molecule and selected hole/particle NTO pair in 3-D;
 - exports CSV, structured JSON, legacy-compatible `OmFrag.txt`, and one PNG map
   per analysed state;
@@ -122,9 +124,18 @@ in the *File cube* tab and can be associated manually.
 7. Inspect Ω maps and render selected NTO pairs. Export the results from *File →
    Esporta risultati*.
 
-Projects (`*.theodore-cp2k.json`) store paths, manual cube associations, and
-fragment definitions. Volumetric results are deliberately recomputed so a
-changed cube can never silently reuse a stale map.
+Version 2 projects (`*.theodore-cp2k.json`) store paths, manual cube
+associations, fragment definitions, and every completed analysis: the
+normalised Omega matrix, hole/particle populations, all analysed descriptors,
+state character, dominant channel, NTO weights, integration stride, method
+flag, and warnings. Saved Omega maps are therefore available immediately when
+the project is reopened. Version 1 project files remain supported and simply
+open without cached analyses.
+
+Changing cube assignments or fragment definitions in the application
+invalidates all restored analyses. If an input file is replaced externally at
+the same path after a project was saved, rerun the analysis before using the
+stored snapshot.
 
 ## Scientific scope and limitations
 

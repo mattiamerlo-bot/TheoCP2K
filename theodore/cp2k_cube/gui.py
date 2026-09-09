@@ -487,7 +487,10 @@ class CP2KCubeApp:
         try:
             self.project = CP2KCubeProject.load(path)
             self._refresh_all()
-            self.status.set("Progetto caricato: %s" % Path(path).name)
+            self.status.set(
+                "Progetto caricato: %s · %d mappe Omega ripristinate."
+                % (Path(path).name, len(self.project.analyses))
+            )
         except Exception as exc:
             self._show_error(exc)
 
@@ -502,7 +505,10 @@ class CP2KCubeApp:
         if path:
             try:
                 self.project.save(path)
-                self.status.set("Progetto salvato: %s" % Path(path).name)
+                self.status.set(
+                    "Progetto salvato: %s · %d mappe Omega e relativi descrittori."
+                    % (Path(path).name, len(self.project.analyses))
+                )
             except Exception as exc:
                 self._show_error(exc)
 
@@ -1098,11 +1104,17 @@ class CP2KCubeApp:
 
     def _show_about(self):
         from tkinter import messagebox
+        from . import __version__
 
         messagebox.showinfo(
             "TheoDORE · CP2K Cube",
-            "Estensione GUI per TheoDORE\nParser CP2K TDDFPT + NTO cube streaming\n\n"
-            "TheoDORE è distribuito con licenza GNU GPL v3.",
+            (
+                "TheoCP2K %s\n"
+                "Estensione GUI per TheoDORE\n"
+                "Parser CP2K TDDFPT + NTO cube streaming\n\n"
+                "TheoDORE è distribuito con licenza GNU GPL v3."
+            )
+            % __version__,
             parent=self.root,
         )
 

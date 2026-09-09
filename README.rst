@@ -12,6 +12,11 @@ upstream TheoDORE sources and adds a standalone graphical workflow for CP2K
 Latest version
 ~~~~~~~~~~~~~~
 
+The current stable version is
+`TheoCP2K v0.1.0 <https://github.com/mattiamerlo-bot/TheoCP2K/releases/tag/v0.1.0>`_.
+It introduces version 2 project files, which retain completed Omega maps and
+their analysed descriptors when a project is saved and reopened.
+
 The latest tested development version is always the tip of
 `main <https://github.com/mattiamerlo-bot/TheoCP2K/tree/main>`_. Its Linux
 AppImage is available from the
@@ -111,9 +116,11 @@ On systems without FUSE, use::
 
     APPIMAGE_EXTRACT_AND_RUN=1 ./TheoCP2K-x86_64.AppImage
 
-Pushing a tag named ``v*`` (for example ``v0.1.0``) also creates a GitHub
-Release containing the AppImage and ``SHA256SUMS.txt``. Build details and local
-instructions are in ``packaging/appimage/README.md``.
+After a successful build on ``main``, the first commit carrying a new version
+in ``VERSION`` automatically creates the matching GitHub Release with the
+AppImage and ``SHA256SUMS.txt``. A tag named ``v*`` can also trigger release
+publication. Build details and local instructions are in
+``packaging/appimage/README.md``.
 
 External libraries
 ~~~~~~~~~~~~~~~~~~

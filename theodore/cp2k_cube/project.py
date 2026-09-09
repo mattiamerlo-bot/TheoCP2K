@@ -17,7 +17,8 @@ from .output_parser import CP2KOutputParser
 
 
 class CP2KCubeProject:
-    schema_version = 1
+    schema_version = 2
+    supported_schema_versions = (1, 2)
 
     def __init__(self):
         self.output: Optional[CP2KRun] = None
@@ -184,6 +185,10 @@ class CP2KCubeProject:
             "cp2k_output": str(output_path) if output_path is not None else None,
             "cube_files": [assignment.to_dict(base_dir=base_dir) for assignment in self.assignments],
             "fragments": self.fragments.to_dict() if self.fragments is not None else None,
+            "analyses": [
+                self.analyses[state_index].to_dict()
+                for state_index in sorted(self.analyses)
+            ],
         }
 
     def save(self, path):
@@ -201,7 +206,11 @@ class CP2KCubeProject:
             data = json.loads(source.read_text(encoding="utf-8"))
         except (OSError, ValueError) as exc:
             raise CP2KCubeError("Progetto non valido: %s" % exc) from exc
-        if int(data.get("schema_version", 0)) != cls.schema_version:
+        try:
+            schema_version = int(data.get("schema_version", 0))
+        except (TypeError, ValueError) as exc:
+            raise CP2KCubeError("Versione del progetto non valida.") from exc
+        if schema_version not in cls.supported_schema_versions:
             raise CP2KCubeError("Versione del progetto non supportata.")
         result = cls()
         output_path = data.get("cp2k_output")
@@ -228,5 +237,29 @@ class CP2KCubeProject:
             result.fragments = FragmentSet.from_dict(
                 data["fragments"], expected_n_atoms=len(result.atoms) or None
             )
+        stored_analyses = data.get("analyses", []) if schema_version >= 2 else []
+        if not isinstance(stored_analyses, list):
+            raise CP2KCubeError("La sezione delle analisi salvate deve essere una lista.")
+        for item in stored_analyses:
+            try:
+                analysis = StateAnalysis.from_dict(item)
+                if result.output is None:
+                    raise ValueError("manca l'output CP2K")
+                result.output.state(analysis.state_index)
+                if result.fragments is None:
+                    raise ValueError("mancano le definizioni dei frammenti")
+                if analysis.fragment_names != result.fragments.names:
+                    raise ValueError("i frammenti non coincidono con quelli del progetto")
+                pairs = result.pairs_for_state(analysis.state_index)
+                if len(analysis.pair_weights_used) != len(pairs):
+                    raise ValueError("il numero di pesi NTO non coincide con le coppie cube")
+                if analysis.state_index in result.analyses:
+                    raise ValueError("lo stato è presente più di una volta")
+            except (KeyError, TypeError, ValueError) as exc:
+                state = item.get("state_index", "?") if isinstance(item, dict) else "?"
+                raise CP2KCubeError(
+                    "Analisi salvata non valida per lo stato %s: %s" % (state, exc)
+                ) from exc
+            result.analyses[analysis.state_index] = analysis
         result.project_path = source
         return result

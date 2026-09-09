@@ -7,6 +7,7 @@ import json
 import sys
 from pathlib import Path
 
+from . import __version__
 from .cube import discover_cube
 from .errors import CP2KCubeError
 from .export import export_json, export_omfrag, export_summary_csv
@@ -20,6 +21,7 @@ def _parser():
         prog="theodore-cp2k",
         description="Analisi TheoDORE-style di NTO cube prodotti da CP2K TDDFPT.",
     )
+    parser.add_argument("--version", action="version", version="TheoCP2K %s" % __version__)
     commands = parser.add_subparsers(dest="command", required=True)
 
     output = commands.add_parser("inspect-output", help="Mostra i dati TDDFPT estratti da un .out")

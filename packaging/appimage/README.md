@@ -9,10 +9,13 @@ do not need to install Python or those modules.
 
 - every push to `main`, every pull request, and a manual `workflow_dispatch`
   run tests and upload a 30-day workflow artifact;
-- a pushed `v*` tag additionally creates a GitHub Release and attaches the
-  AppImage plus `SHA256SUMS.txt`.
+- the version in `VERSION` is released automatically after its first successful
+  build on `main`; later builds of the same version leave the release unchanged;
+- a pushed `v*` tag can also create the corresponding GitHub Release and attach
+  the AppImage plus `SHA256SUMS.txt`.
 
-Example release:
+To prepare the next release, update `VERSION` and the package
+`__version__`, then push the change to `main`. A manual tag remains supported:
 
 ```bash
 git tag -a v0.1.0 -m "TheoCP2K v0.1.0"

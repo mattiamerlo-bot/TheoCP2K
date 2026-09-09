@@ -221,6 +221,80 @@ class StateAnalysis:
             "warnings": self.warnings,
         }
 
+    @classmethod
+    def from_dict(cls, data: dict):
+        """Restore and validate an analysis stored in a project snapshot."""
+
+        try:
+            state_index = int(data["state_index"])
+            fragment_names = [str(value) for value in data["fragment_names"]]
+            omega = np.asarray(data["omega"], dtype=float)
+            omega_raw_sum = float(data["omega_raw_sum"])
+            hole_population = np.asarray(data["hole_population"], dtype=float)
+            electron_population = np.asarray(data["electron_population"], dtype=float)
+            descriptors = {
+                str(name): float(value) for name, value in data["descriptors"].items()
+            }
+            character = str(data["character"])
+            dominant_channel = str(data["dominant_channel"])
+            pair_weights_used = [float(value) for value in data["pair_weights_used"]]
+            grid_stride = tuple(int(value) for value in data["grid_stride"])
+            approximate = bool(data.get("approximate", True))
+            warnings = [str(value) for value in data.get("warnings", [])]
+        except (KeyError, TypeError, ValueError) as exc:
+            raise ValueError("Campi dell'analisi mancanti o non validi: %s" % exc) from exc
+
+        n_fragments = len(fragment_names)
+        if state_index < 1:
+            raise ValueError("L'indice dello stato deve essere positivo.")
+        if n_fragments < 1:
+            raise ValueError("L'analisi non contiene frammenti.")
+        if omega.shape != (n_fragments, n_fragments):
+            raise ValueError(
+                "La matrice Omega ha forma %s, attesa (%d, %d)."
+                % (omega.shape, n_fragments, n_fragments)
+            )
+        if hole_population.shape != (n_fragments,) or electron_population.shape != (n_fragments,):
+            raise ValueError("Le popolazioni hole/particle non corrispondono ai frammenti.")
+        if not np.all(np.isfinite(omega)) or np.any(omega < -1.0e-12):
+            raise ValueError("La matrice Omega contiene valori non validi.")
+        if not np.isclose(float(omega.sum()), 1.0, atol=1.0e-8, rtol=1.0e-8):
+            raise ValueError("La matrice Omega salvata non è normalizzata.")
+        if not np.allclose(hole_population, omega.sum(axis=1), atol=1.0e-8, rtol=1.0e-8):
+            raise ValueError("La popolazione hole non coincide con la matrice Omega.")
+        if not np.allclose(electron_population, omega.sum(axis=0), atol=1.0e-8, rtol=1.0e-8):
+            raise ValueError("La popolazione particle non coincide con la matrice Omega.")
+        if not np.isfinite(omega_raw_sum) or omega_raw_sum <= 0.0:
+            raise ValueError("La somma Omega non normalizzata non è valida.")
+        if len(grid_stride) != 3 or any(value < 1 for value in grid_stride):
+            raise ValueError("Lo stride salvato deve contenere tre interi positivi.")
+        if (
+            not pair_weights_used
+            or not np.all(np.isfinite(pair_weights_used))
+            or any(value <= 0.0 for value in pair_weights_used)
+        ):
+            raise ValueError("I pesi NTO salvati non sono validi.")
+        if not all(np.isfinite(value) for value in descriptors.values()):
+            raise ValueError("I descrittori salvati contengono valori non validi.")
+        if not character or not dominant_channel:
+            raise ValueError("Carattere o canale dominante mancanti nell'analisi salvata.")
+
+        return cls(
+            state_index=state_index,
+            omega=omega,
+            omega_raw_sum=omega_raw_sum,
+            fragment_names=fragment_names,
+            hole_population=hole_population,
+            electron_population=electron_population,
+            descriptors=descriptors,
+            character=character,
+            dominant_channel=dominant_channel,
+            pair_weights_used=pair_weights_used,
+            grid_stride=grid_stride,
+            approximate=approximate,
+            warnings=warnings,
+        )
+
 
 @dataclass
 class PreviewVolume:

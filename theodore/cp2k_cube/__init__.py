@@ -6,6 +6,8 @@ the AO overlap matrix and therefore cannot reproduce Mulliken/Lowdin charge
 transfer numbers verbatim.
 """
 
+__version__ = "0.1.0"
+
 from .analysis import CubeStateAnalyzer, classify_state, omega_descriptors
 from .cube import CubeValueStream, discover_cube, read_cube_header, read_preview_volume
 from .errors import (
@@ -32,6 +34,7 @@ from .output_parser import CP2KOutputParser
 from .project import CP2KCubeProject
 
 __all__ = [
+    "__version__",
     "AnalysisCancelled",
     "Atom",
     "BOHR_TO_ANGSTROM",
