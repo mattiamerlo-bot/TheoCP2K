@@ -21,9 +21,11 @@ this implementation).
   reports TheoDORE-style CT/PR/POS/COH descriptors;
 - stores completed Omega maps and their analysed descriptors inside version 2
   project files and restores them when a project is reopened;
-- displays the molecule and selected hole/particle NTO pair in 3-D;
+- displays the molecule and selected NTO pair in 3-D, or the hole and
+  particle/electron orbitals separately, and saves any view as PNG, PDF, or SVG;
 - exports CSV, structured JSON, legacy-compatible `OmFrag.txt`, and one PNG map
-  per analysed state;
+  per analysed state; the CSV includes normalised hole and electron
+  localisations for every fragment;
 - includes a headless CLI for reproducible runs.
 
 Rows of every Ω map are **hole fragments** and columns are
@@ -137,8 +139,16 @@ in the *File cube* tab and can be associated manually.
    second point along each axis (roughly eight times fewer samples). The selected
    value is recorded in every result.
 6. Analyse one state or all states with complete pairs.
-7. Inspect Ω maps and render selected NTO pairs. Export the results from *File →
-   Esporta risultati*.
+7. Inspect Ω maps. In *Visualizzatore NTO*, choose *Coppia*, *Solo lacuna*, or
+   *Solo elettrone*; use *Salva immagine…* to write the selected view as PNG,
+   PDF, or SVG. Export the numerical results from *File → Esporta risultati*.
+
+The summary CSV adds two columns per fragment named
+`hole_localization[fragment]` and `electron_localization[fragment]`. Their
+values are fractions between 0 and 1; each family sums to 1 for every state.
+They are respectively the row and column marginal populations of the
+normalised Ω matrix. Here “electron” and CP2K “particle” denote the same NTO
+role.
 
 Version 2 projects (`*.theodore-cp2k.json`) store paths, manual cube
 associations, fragment definitions, and every completed analysis: the

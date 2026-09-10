@@ -124,19 +124,66 @@ def _surface_or_points(ax, preview: PreviewVolume, level: float, color: str, alp
     return xyz
 
 
+def _draw_nto_molecule(ax, atoms):
+    coordinates = np.asarray([atom.position_angstrom for atom in atoms], dtype=float)
+    if not atoms:
+        return np.empty((0, 3))
+    for i, j in infer_bonds(atoms):
+        xyz = coordinates[[i, j]]
+        ax.plot(xyz[:, 0], xyz[:, 1], xyz[:, 2], color="#8A8A8A", linewidth=1.1, alpha=0.75)
+    for index, atom in enumerate(atoms):
+        ax.scatter(
+            *coordinates[index],
+            s=25 if atom.atomic_number == 1 else 48,
+            color=element_color(atom.atomic_number),
+            edgecolor="#333333",
+            linewidth=0.35,
+        )
+    return coordinates
+
+
+def _finish_nto_axes(ax, coordinates, title):
+    nonempty = [item for item in coordinates if item.size]
+    combined = np.vstack(nonempty) if nonempty else np.empty((0, 3))
+    _equal_3d_axes(ax, combined, pad=0.8)
+    ax.set_xlabel("x / Å")
+    ax.set_ylabel("y / Å")
+    ax.set_zlabel("z / Å")
+    ax.set_title(title)
+    ax.grid(False)
+    if marching_cubes is None:
+        ax.text2D(
+            0.01, 0.01, "Anteprima a punti; installare scikit-image per isosuperfici",
+            transform=ax.transAxes, fontsize=8, color="#555555",
+        )
+
+
+def draw_nto(ax, orbital: PreviewVolume, role: str, relative_level: float = 0.12):
+    """Draw one signed hole or particle NTO without overlaying its partner."""
+
+    styles = {
+        "hole": ("#2F6BFF", "#E53935", "NTO hole / lacuna (blu/rosso)"),
+        "particle": ("#FF9F1C", "#22A06B", "NTO particle / elettrone (arancio/verde)"),
+    }
+    try:
+        positive_color, negative_color, title = styles[role]
+    except KeyError as exc:
+        raise ValueError("Il ruolo NTO deve essere 'hole' o 'particle'.") from exc
+
+    ax.clear()
+    coordinates = [_draw_nto_molecule(ax, orbital.atoms)]
+    maximum = float(np.max(np.abs(orbital.values)))
+    if maximum > 0.0:
+        coordinates.append(_surface_or_points(ax, orbital, relative_level * maximum, positive_color, 0.5))
+        coordinates.append(_surface_or_points(ax, orbital, -relative_level * maximum, negative_color, 0.5))
+    _finish_nto_axes(ax, coordinates, title)
+
+
 def draw_nto_pair(ax, hole: PreviewVolume, particle: PreviewVolume, relative_level: float = 0.12):
     """Draw positive/negative lobes of a matched hole/particle NTO pair."""
 
     ax.clear()
-    coordinates = [np.asarray([atom.position_angstrom for atom in hole.atoms], dtype=float)]
-    for atoms in (hole.atoms,):
-        coords = np.asarray([atom.position_angstrom for atom in atoms], dtype=float)
-        for i, j in infer_bonds(atoms):
-            xyz = coords[[i, j]]
-            ax.plot(xyz[:, 0], xyz[:, 1], xyz[:, 2], color="#8A8A8A", linewidth=1.1, alpha=0.75)
-        for index, atom in enumerate(atoms):
-            ax.scatter(*coords[index], s=25 if atom.atomic_number == 1 else 48, color=element_color(atom.atomic_number), edgecolor="#333333", linewidth=0.35)
-
+    coordinates = [_draw_nto_molecule(ax, hole.atoms)]
     max_hole = float(np.max(np.abs(hole.values)))
     max_particle = float(np.max(np.abs(particle.values)))
     if max_hole > 0.0:
@@ -145,17 +192,4 @@ def draw_nto_pair(ax, hole: PreviewVolume, particle: PreviewVolume, relative_lev
     if max_particle > 0.0:
         coordinates.append(_surface_or_points(ax, particle, relative_level * max_particle, "#FF9F1C", 0.42))
         coordinates.append(_surface_or_points(ax, particle, -relative_level * max_particle, "#22A06B", 0.42))
-
-    nonempty = [item for item in coordinates if item.size]
-    combined = np.vstack(nonempty) if nonempty else np.empty((0, 3))
-    _equal_3d_axes(ax, combined, pad=0.8)
-    ax.set_xlabel("x / Å")
-    ax.set_ylabel("y / Å")
-    ax.set_zlabel("z / Å")
-    ax.set_title("NTO hole (blu/rosso) + particle (arancio/verde)")
-    ax.grid(False)
-    if marching_cubes is None:
-        ax.text2D(
-            0.01, 0.01, "Anteprima a punti; installare scikit-image per isosuperfici",
-            transform=ax.transAxes, fontsize=8, color="#555555",
-        )
+    _finish_nto_axes(ax, coordinates, "NTO hole (blu/rosso) + particle (arancio/verde)")

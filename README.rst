@@ -13,10 +13,10 @@ Latest version
 ~~~~~~~~~~~~~~
 
 The current stable version is
-`TheoCP2K v0.1.1 <https://github.com/mattiamerlo-bot/TheoCP2K/releases/tag/v0.1.1>`_.
-It adds consistent application icons for the Tk window and Linux dock, an
-installable desktop entry, and retains the version 2 project format introduced
-in v0.1.0.
+`TheoCP2K v0.1.2 <https://github.com/mattiamerlo-bot/TheoCP2K/releases/tag/v0.1.2>`_.
+It adds separate hole and electron/particle NTO views with PNG/PDF/SVG export,
+and reports their normalised per-fragment localisations in every summary CSV.
+It retains the runtime/dock icon integration and version 2 project format.
 
 The latest tested development version is always the tip of
 `main <https://github.com/mattiamerlo-bot/TheoCP2K/tree/main>`_. Its Linux
@@ -91,7 +91,7 @@ CP2K TDDFPT NTO cube GUI
 
 This fork adds a memory-bounded CP2K ``.out``/NTO ``.cube`` workflow and a
 desktop GUI with editable molecular fragments, state assignment, fragment
-electron-hole maps, and 3-D NTO display::
+electron-hole maps, combined or separate 3-D NTO display, and image export::
 
     python -m theodore.cp2k_cube.gui
 

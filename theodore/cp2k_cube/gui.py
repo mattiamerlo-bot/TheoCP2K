@@ -15,7 +15,7 @@ from .errors import AnalysisCancelled, CP2KCubeError
 from .export import export_json, export_omfrag, export_summary_csv
 from .fragments import FragmentSet
 from .icon import TK_WINDOW_CLASS, apply_window_icon
-from .plotting import draw_molecule, draw_nto_pair, draw_omega
+from .plotting import draw_molecule, draw_nto, draw_nto_pair, draw_omega
 from .project import CP2KCubeProject
 
 
@@ -124,6 +124,7 @@ class CP2KCubeApp:
         self.map_state = tk.StringVar()
         self.nto_state = tk.StringVar()
         self.nto_pair = tk.StringVar()
+        self.nto_view = tk.StringVar(value="pair")
         self.nto_level = tk.DoubleVar(value=12.0)
         self.nto_resolution = tk.IntVar(value=90)
 
@@ -334,24 +335,37 @@ class CP2KCubeApp:
 
         self.nto_tab = ttk.Frame(self.notebook, padding=8)
         self.notebook.add(self.nto_tab, text="Visualizzatore NTO")
-        top = ttk.Frame(self.nto_tab)
-        top.pack(fill="x", pady=(0, 6))
-        ttk.Label(top, text="Stato").pack(side="left")
-        self.nto_state_box = ttk.Combobox(top, textvariable=self.nto_state, state="readonly", width=9)
+        controls = ttk.Frame(self.nto_tab)
+        controls.pack(fill="x", pady=(0, 4))
+        ttk.Label(controls, text="Stato").pack(side="left")
+        self.nto_state_box = ttk.Combobox(controls, textvariable=self.nto_state, state="readonly", width=9)
         self.nto_state_box.pack(side="left", padx=(5, 10))
         self.nto_state_box.bind("<<ComboboxSelected>>", lambda event: self._refresh_nto_pairs())
-        ttk.Label(top, text="Coppia NTO").pack(side="left")
-        self.nto_pair_box = ttk.Combobox(top, textvariable=self.nto_pair, state="readonly", width=8)
+        ttk.Label(controls, text="Coppia NTO").pack(side="left")
+        self.nto_pair_box = ttk.Combobox(controls, textvariable=self.nto_pair, state="readonly", width=8)
         self.nto_pair_box.pack(side="left", padx=(5, 10))
-        ttk.Label(top, text="Isolivello relativo %").pack(side="left")
-        ttk.Spinbox(top, from_=1, to=60, width=5, textvariable=self.nto_level).pack(side="left", padx=(5, 10))
-        ttk.Label(top, text="Max punti/asse").pack(side="left")
-        ttk.Spinbox(top, from_=30, to=160, increment=10, width=5, textvariable=self.nto_resolution).pack(
+        ttk.Label(controls, text="Isolivello relativo %").pack(side="left")
+        ttk.Spinbox(controls, from_=1, to=60, width=5, textvariable=self.nto_level).pack(
             side="left", padx=(5, 10)
         )
-        ttk.Button(top, text="Visualizza", style="Accent.TButton", command=self._render_nto).pack(side="left")
+        ttk.Label(controls, text="Max punti/asse").pack(side="left")
+        ttk.Spinbox(controls, from_=30, to=160, increment=10, width=5, textvariable=self.nto_resolution).pack(
+            side="left", padx=(5, 10)
+        )
+
+        actions = ttk.Frame(self.nto_tab)
+        actions.pack(fill="x", pady=(0, 6))
+        ttk.Label(actions, text="Vista").pack(side="left")
+        for label, value in (("Coppia", "pair"), ("Solo lacuna", "hole"), ("Solo elettrone", "particle")):
+            ttk.Radiobutton(
+                actions, text=label, value=value, variable=self.nto_view, command=self._refresh_nto_pairs
+            ).pack(side="left", padx=(6, 0))
+        ttk.Button(actions, text="Visualizza", style="Accent.TButton", command=self._render_nto).pack(
+            side="left", padx=(14, 4)
+        )
+        ttk.Button(actions, text="Salva immagine…", command=self._save_nto).pack(side="left")
         ttk.Label(
-            top, text="blu/rosso = hole · arancio/verde = particle", foreground="#555555"
+            actions, text="blu/rosso = hole · arancio/verde = particle/elettrone", foreground="#555555"
         ).pack(side="right")
 
         self.nto_figure = Figure(figsize=(8, 6), dpi=100, constrained_layout=True)
@@ -763,15 +777,20 @@ class CP2KCubeApp:
 
         self._start_worker("analysis", work, "Analisi di %d stato/i…" % len(states))
 
-    def _render_nto(self):
+    def _render_nto(self, save_path=None):
         if self.worker is not None:
             return
         try:
             state_index = int(self.nto_state.get().lstrip("S"))
             pair_index = int(self.nto_pair.get())
             roles = self.project.pairs_for_state(state_index)[pair_index]
-            hole = roles["hole"]
-            particle = roles["particle"]
+            view = self.nto_view.get()
+            if view not in ("pair", "hole", "particle"):
+                raise ValueError("vista non riconosciuta")
+            required_roles = ("hole", "particle") if view == "pair" else (view,)
+            missing_roles = [role for role in required_roles if role not in roles]
+            if missing_roles:
+                raise ValueError("cube %s non disponibile" % "/".join(missing_roles))
             resolution = int(self.nto_resolution.get())
             level = float(self.nto_level.get()) / 100.0
             if not (0.0 < level < 1.0):
@@ -781,19 +800,22 @@ class CP2KCubeApp:
             return
 
         def work(progress):
-            hole_preview = read_preview_volume(
-                hole.header, max_axis_points=resolution,
-                progress=lambda fraction, message: progress(0.5 * fraction, message),
-                cancel_event=self.cancel_event,
-            )
-            particle_preview = read_preview_volume(
-                particle.header, max_axis_points=resolution,
-                progress=lambda fraction, message: progress(0.5 + 0.5 * fraction, message),
-                cancel_event=self.cancel_event,
-            )
-            return state_index, pair_index, level, hole_preview, particle_preview
+            previews = {}
+            role_count = len(required_roles)
+            for role_number, role in enumerate(required_roles):
+                assignment = roles[role]
+                previews[role] = read_preview_volume(
+                    assignment.header,
+                    max_axis_points=resolution,
+                    progress=lambda fraction, message, offset=role_number: progress(
+                        (offset + fraction) / role_count, message
+                    ),
+                    cancel_event=self.cancel_event,
+                )
+            return state_index, pair_index, level, view, previews, Path(save_path) if save_path else None
 
-        self._start_worker("nto", work, "Lettura delle NTO…")
+        view_label = {"pair": "coppia NTO", "hole": "NTO lacuna", "particle": "NTO elettrone"}[view]
+        self._start_worker("nto", work, "Lettura %s…" % view_label)
 
     def _start_worker(self, kind, function, message):
         self.cancel_event.clear()
@@ -835,11 +857,26 @@ class CP2KCubeApp:
                             self.map_state.set("S%d" % message[2][0].state_index)
                             self._draw_map()
                     elif message[1] == "nto":
-                        state, pair, level, hole, particle = message[2]
-                        draw_nto_pair(self.nto_ax, hole, particle, relative_level=level)
-                        self.nto_ax.set_title("S%d · coppia NTO %d" % (state, pair))
+                        state, pair, level, view, previews, save_path = message[2]
+                        if view == "pair":
+                            draw_nto_pair(
+                                self.nto_ax, previews["hole"], previews["particle"], relative_level=level
+                            )
+                            view_label = "hole + particle"
+                        else:
+                            draw_nto(self.nto_ax, previews[view], role=view, relative_level=level)
+                            view_label = "lacuna (hole)" if view == "hole" else "elettrone (particle)"
+                        self.nto_ax.set_title("S%d · coppia NTO %d · %s" % (state, pair, view_label))
                         self.nto_canvas.draw_idle()
-                        self.status.set("NTO visualizzate: S%d, coppia %d." % (state, pair))
+                        if save_path is not None:
+                            try:
+                                self.nto_figure.savefig(save_path, dpi=200)
+                            except Exception as exc:
+                                self._show_error(exc)
+                            else:
+                                self.status.set("NTO salvata: %s" % save_path.name)
+                        else:
+                            self.status.set("NTO visualizzata: S%d, coppia %d, %s." % (state, pair, view_label))
                 elif message[0] == "cancelled":
                     self._finish_worker()
                     self.status.set(message[2])
@@ -1018,15 +1055,44 @@ class CP2KCubeApp:
         except ValueError:
             pairs = []
         else:
+            view = self.nto_view.get()
             pairs = [
                 str(index) for index, roles in sorted(self.project.pairs_for_state(state_index).items())
-                if "hole" in roles and "particle" in roles
+                if (
+                    (view == "pair" and "hole" in roles and "particle" in roles)
+                    or (view in ("hole", "particle") and view in roles)
+                )
             ]
         self.nto_pair_box["values"] = pairs
         if pairs and self.nto_pair.get() not in pairs:
             self.nto_pair.set(pairs[0])
         elif not pairs:
             self.nto_pair.set("")
+
+    def _save_nto(self):
+        from tkinter import filedialog
+
+        if not self._idle_or_warn():
+            return
+        try:
+            state = self.nto_state.get()
+            pair = int(self.nto_pair.get())
+            view = self.nto_view.get()
+            suffix = {"pair": "pair", "hole": "hole", "particle": "electron"}[view]
+            if not state:
+                raise ValueError("selezionare uno stato")
+        except (KeyError, ValueError) as exc:
+            self._show_error(CP2KCubeError("Selezione NTO non valida: %s" % exc))
+            return
+        path = filedialog.asksaveasfilename(
+            parent=self.root,
+            title="Salva NTO %s" % ("lacuna" if view == "hole" else "elettrone" if view == "particle" else "coppia"),
+            initialfile="%s_NTO%02d_%s.png" % (state, pair, suffix),
+            defaultextension=".png",
+            filetypes=(("PNG", "*.png"), ("PDF", "*.pdf"), ("SVG", "*.svg")),
+        )
+        if path:
+            self._render_nto(save_path=path)
 
     def _draw_map(self):
         self.map_figure.clear()

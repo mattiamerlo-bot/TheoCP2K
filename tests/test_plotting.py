@@ -6,7 +6,7 @@ from matplotlib.figure import Figure
 import numpy as np
 
 from theodore.cp2k_cube.models import Atom, PreviewVolume, StateAnalysis
-from theodore.cp2k_cube.plotting import draw_molecule, draw_nto_pair, draw_omega
+from theodore.cp2k_cube.plotting import draw_molecule, draw_nto, draw_nto_pair, draw_omega
 
 
 class PlottingTest(unittest.TestCase):
@@ -50,6 +50,28 @@ class PlottingTest(unittest.TestCase):
         )
         figure = Figure(figsize=(4, 3))
         draw_nto_pair(figure.add_subplot(111, projection="3d"), preview, preview, relative_level=0.5)
+        figure.canvas.draw()
+
+    def test_hole_and_electron_ntos_render_separately(self):
+        values = np.zeros((7, 7, 7), dtype=np.float32)
+        values[2:5, 2:5, 2:5] = 1.0
+        values[0:2, 0:2, 0:2] = -0.8
+        preview = PreviewVolume(
+            values=values,
+            origin_bohr=np.zeros(3),
+            axes_bohr=np.eye(3),
+            sampling_stride=(1, 1, 1),
+            atoms=self.atoms,
+        )
+        figure = Figure(figsize=(8, 3))
+        hole_ax = figure.add_subplot(121, projection="3d")
+        electron_ax = figure.add_subplot(122, projection="3d")
+        draw_nto(hole_ax, preview, role="hole", relative_level=0.5)
+        draw_nto(electron_ax, preview, role="particle", relative_level=0.5)
+        self.assertIn("lacuna", hole_ax.get_title())
+        self.assertIn("elettrone", electron_ax.get_title())
+        with self.assertRaisesRegex(ValueError, "ruolo NTO"):
+            draw_nto(hole_ax, preview, role="invalid", relative_level=0.5)
         figure.canvas.draw()
 
 
