@@ -60,6 +60,22 @@ Existing full TheoDORE environments can use `python -m pip install -e
 The extension is also registered as `theodore cp2k_cube_gui` in the legacy
 dispatcher.
 
+### Linux desktop launcher and dock icon
+
+The AppImage embeds `TheoCP2K.desktop` and the scalable application icon. The
+Tk runtime also sets the same icon and the `TheoCP2K` window class, allowing
+Linux desktops to associate the running window with its launcher in the dock.
+
+For a Python/editable installation, install the desktop entry for the current
+user after installing the `theodore-cp2k-gui` command:
+
+```bash
+packaging/linux/install-desktop.sh
+```
+
+This copies only `TheoCP2K.desktop` and `TheoCP2K.svg` below
+`${XDG_DATA_HOME:-$HOME/.local/share}`.
+
 ## Suggested CP2K print section
 
 The exact enclosing input depends on the calculation. The relevant print key

@@ -47,9 +47,11 @@ jobs:
       - name: Validate desktop integration files
         run: |
           desktop-file-validate packaging/appimage/TheoCP2K.desktop
+          desktop-file-validate packaging/linux/TheoCP2K.desktop
           bash -n packaging/appimage/AppRun
           bash -n packaging/appimage/theocp2k-wrapper
           bash -n packaging/appimage/build-appimage.sh
+          bash -n packaging/linux/install-desktop.sh
 
       - name: Build AppImage
         env:

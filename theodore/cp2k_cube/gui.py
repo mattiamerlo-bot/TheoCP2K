@@ -14,6 +14,7 @@ from .cube import read_preview_volume
 from .errors import AnalysisCancelled, CP2KCubeError
 from .export import export_json, export_omfrag, export_summary_csv
 from .fragments import FragmentSet
+from .icon import apply_window_icon
 from .plotting import draw_molecule, draw_nto_pair, draw_omega
 from .project import CP2KCubeProject
 
@@ -1147,7 +1148,9 @@ def main(argv=None):
         )
         return 2
     try:
-        root = tk.Tk()
+        root = tk.Tk(className="TheoCP2K")
+        root.tk.call("tk", "appname", "TheoCP2K")
+        apply_window_icon(root, strict=args.smoke_test)
     except tk.TclError as exc:
         import sys
 
@@ -1156,6 +1159,10 @@ def main(argv=None):
     CP2KCubeApp(root, initial_output=args.out, initial_cubes=args.cube)
     if args.smoke_test:
         root.update_idletasks()
+        if root.winfo_class() != "TheoCP2K":
+            raise RuntimeError("La WM_CLASS della finestra non coincide con la desktop entry.")
+        if len(getattr(root, "_theocp2k_icons", ())) != 3:
+            raise RuntimeError("L'icona runtime non è stata applicata alla finestra Tk.")
         root.destroy()
         return 0
     root.mainloop()

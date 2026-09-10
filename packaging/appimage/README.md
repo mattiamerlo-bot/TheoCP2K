@@ -3,7 +3,9 @@
 The GitHub Actions workflow in `.github/workflows/appimage.yml` builds the
 standalone `TheoCP2K-x86_64.AppImage` on Ubuntu 22.04. The bundle contains
 Python, Tk, NumPy, Matplotlib, SciPy, scikit-image, and the CP2K cube GUI; users
-do not need to install Python or those modules.
+do not need to install Python or those modules. Its embedded desktop entry uses
+`StartupWMClass=TheoCP2K`, matching the Tk window class and runtime icon so the
+window is grouped under the correct Linux dock icon.
 
 ## Automatic builds
 
@@ -18,8 +20,8 @@ To prepare the next release, update `VERSION` and the package
 `__version__`, then push the change to `main`. A manual tag remains supported:
 
 ```bash
-git tag -a v0.1.0 -m "TheoCP2K v0.1.0"
-git push origin v0.1.0
+git tag -a v0.1.1 -m "TheoCP2K v0.1.1"
+git push origin v0.1.1
 ```
 
 ## Local x86_64 build

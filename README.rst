@@ -13,9 +13,10 @@ Latest version
 ~~~~~~~~~~~~~~
 
 The current stable version is
-`TheoCP2K v0.1.0 <https://github.com/mattiamerlo-bot/TheoCP2K/releases/tag/v0.1.0>`_.
-It introduces version 2 project files, which retain completed Omega maps and
-their analysed descriptors when a project is saved and reopened.
+`TheoCP2K v0.1.1 <https://github.com/mattiamerlo-bot/TheoCP2K/releases/tag/v0.1.1>`_.
+It adds consistent application icons for the Tk window and Linux dock, an
+installable desktop entry, and retains the version 2 project format introduced
+in v0.1.0.
 
 The latest tested development version is always the tip of
 `main <https://github.com/mattiamerlo-bot/TheoCP2K/tree/main>`_. Its Linux
@@ -115,6 +116,14 @@ workflow run, extract the artifact, and run::
 On systems without FUSE, use::
 
     APPIMAGE_EXTRACT_AND_RUN=1 ./TheoCP2K-x86_64.AppImage
+
+The AppImage contains its own ``TheoCP2K.desktop`` launcher. For a regular
+Python installation, install the repository's desktop entry and icon with::
+
+    packaging/linux/install-desktop.sh
+
+The Tk window class and ``StartupWMClass`` are both ``TheoCP2K``, so supported
+Linux desktops group the running window under the correct dock icon.
 
 After a successful build on ``main``, the first commit carrying a new version
 in ``VERSION`` automatically creates the matching GitHub Release with the
