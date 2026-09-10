@@ -122,7 +122,7 @@ Python installation, install the repository's desktop entry and icon with::
 
     packaging/linux/install-desktop.sh
 
-The Tk window class and ``StartupWMClass`` are both ``TheoCP2K``, so supported
+The Tk window class and ``StartupWMClass`` use the same internal value, so supported
 Linux desktops group the running window under the correct dock icon.
 
 After a successful build on ``main``, the first commit carrying a new version

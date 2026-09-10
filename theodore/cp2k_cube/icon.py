@@ -3,6 +3,11 @@
 from __future__ import annotations
 
 
+# Tk derives the X11 resource class by applying Tcl's title-case conversion to
+# the application name. Use that exact value in StartupWMClass as well.
+TK_WINDOW_CLASS = "Theocp2k"
+
+
 # 128x128 PNG rendered from packaging/appimage/TheoCP2K.svg. Keeping the
 # runtime icon inside the Python package makes it available from source,
 # editable installs, and the PyInstaller/AppImage bundle without path probing.
@@ -89,4 +94,4 @@ def apply_window_icon(root, strict=False):
     return icons
 
 
-__all__ = ["ICON_PNG_BASE64", "apply_window_icon"]
+__all__ = ["ICON_PNG_BASE64", "TK_WINDOW_CLASS", "apply_window_icon"]

@@ -5,7 +5,7 @@ from pathlib import Path
 import struct
 import unittest
 
-from theodore.cp2k_cube.icon import ICON_PNG_BASE64
+from theodore.cp2k_cube.icon import ICON_PNG_BASE64, TK_WINDOW_CLASS
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -33,7 +33,7 @@ class DesktopIntegrationTest(unittest.TestCase):
         source = read_desktop(ROOT / "packaging/linux/TheoCP2K.desktop")
         for entry in (appimage, source):
             self.assertEqual(entry["Icon"], "TheoCP2K")
-            self.assertEqual(entry["StartupWMClass"], "TheoCP2K")
+            self.assertEqual(entry["StartupWMClass"], TK_WINDOW_CLASS)
             self.assertEqual(entry["Terminal"], "false")
         self.assertEqual(appimage["Exec"], "TheoCP2K")
         self.assertEqual(source["Exec"], "theodore-cp2k-gui")

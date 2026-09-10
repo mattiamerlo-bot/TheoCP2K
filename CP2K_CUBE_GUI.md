@@ -63,7 +63,7 @@ dispatcher.
 ### Linux desktop launcher and dock icon
 
 The AppImage embeds `TheoCP2K.desktop` and the scalable application icon. The
-Tk runtime also sets the same icon and the `TheoCP2K` window class, allowing
+Tk runtime also sets the same icon and a matching window class, allowing
 Linux desktops to associate the running window with its launcher in the dock.
 
 For a Python/editable installation, install the desktop entry for the current
