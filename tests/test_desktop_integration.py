@@ -1,5 +1,6 @@
 import base64
 import configparser
+import hashlib
 from pathlib import Path
 import struct
 import unittest
@@ -22,6 +23,10 @@ class DesktopIntegrationTest(unittest.TestCase):
         payload = base64.b64decode(ICON_PNG_BASE64, validate=True)
         self.assertEqual(payload[:8], b"\x89PNG\r\n\x1a\n")
         self.assertEqual(struct.unpack(">II", payload[16:24]), (128, 128))
+        self.assertEqual(
+            hashlib.sha256(payload).hexdigest(),
+            "2b3505ae6c5f8786956dea756640f14d9fa1d33c3ae6a60544990cf3cd3874e0",
+        )
 
     def test_desktop_entries_match_tk_window_class(self):
         appimage = read_desktop(ROOT / "packaging/appimage/TheoCP2K.desktop")
