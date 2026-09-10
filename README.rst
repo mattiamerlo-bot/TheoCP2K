@@ -13,10 +13,11 @@ Latest version
 ~~~~~~~~~~~~~~
 
 The current stable version is
-`TheoCP2K v0.1.2 <https://github.com/mattiamerlo-bot/TheoCP2K/releases/tag/v0.1.2>`_.
-It adds separate hole and electron/particle NTO views with PNG/PDF/SVG export,
-and reports their normalised per-fragment localisations in every summary CSV.
-It retains the runtime/dock icon integration and version 2 project format.
+`TheoCP2K v0.1.3 <https://github.com/mattiamerlo-bot/TheoCP2K/releases/tag/v0.1.3>`_.
+It preloads each selected hole/particle pair into a bounded cache, allowing
+instant switching between the combined, hole-only, and electron-only views
+without rereading large cube files. It retains separate PNG/PDF/SVG export,
+per-fragment CSV localisations, runtime/dock icons, and version 2 projects.
 
 The latest tested development version is always the tip of
 `main <https://github.com/mattiamerlo-bot/TheoCP2K/tree/main>`_. Its Linux

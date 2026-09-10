@@ -23,6 +23,9 @@ this implementation).
   project files and restores them when a project is reopened;
 - displays the molecule and selected NTO pair in 3-D, or the hole and
   particle/electron orbitals separately, and saves any view as PNG, PDF, or SVG;
+- preloads both members of a selected NTO pair into a 256 MiB LRU cache, so
+  switching among pair, hole, and electron views redraws immediately without
+  rereading the cube files;
 - exports CSV, structured JSON, legacy-compatible `OmFrag.txt`, and one PNG map
   per analysed state; the CSV includes normalised hole and electron
   localisations for every fragment;
@@ -142,6 +145,13 @@ in the *File cube* tab and can be associated manually.
 7. Inspect Ω maps. In *Visualizzatore NTO*, choose *Coppia*, *Solo lacuna*, or
    *Solo elettrone*; use *Salva immagine…* to write the selected view as PNG,
    PDF, or SVG. Export the numerical results from *File → Esporta risultati*.
+
+The first visualisation of a selected pair reads and caches both hole and
+particle previews. The three view selectors then update the plot immediately;
+changing only the isoline level and pressing *Visualizza* also reuses the same
+previews. Cache entries are keyed by file size, modification time, and preview
+resolution, so changing a cube or *Max punti/asse* triggers a fresh read. Least
+recently used entries are discarded automatically above 256 MiB.
 
 The summary CSV adds two columns per fragment named
 `hole_localization[fragment]` and `electron_localization[fragment]`. Their

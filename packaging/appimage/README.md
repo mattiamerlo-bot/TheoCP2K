@@ -20,8 +20,8 @@ To prepare the next release, update `VERSION` and the package
 `__version__`, then push the change to `main`. A manual tag remains supported:
 
 ```bash
-git tag -a v0.1.2 -m "TheoCP2K v0.1.2"
-git push origin v0.1.2
+git tag -a v0.1.3 -m "TheoCP2K v0.1.3"
+git push origin v0.1.3
 ```
 
 ## Local x86_64 build

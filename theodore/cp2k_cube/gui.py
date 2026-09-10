@@ -16,6 +16,7 @@ from .export import export_json, export_omfrag, export_summary_csv
 from .fragments import FragmentSet
 from .icon import TK_WINDOW_CLASS, apply_window_icon
 from .plotting import draw_molecule, draw_nto, draw_nto_pair, draw_omega
+from .preview_cache import NTOPreviewCache
 from .project import CP2KCubeProject
 
 
@@ -108,6 +109,8 @@ class CP2KCubeApp:
         self.worker_kind = None
         self.worker_queue = queue.Queue()
         self.cancel_event = threading.Event()
+        self.nto_preview_cache = NTOPreviewCache()
+        self.nto_redraw_pending = False
 
         root.title("TheoDORE · CP2K Cube")
         root.geometry("1380x860")
@@ -358,7 +361,7 @@ class CP2KCubeApp:
         ttk.Label(actions, text="Vista").pack(side="left")
         for label, value in (("Coppia", "pair"), ("Solo lacuna", "hole"), ("Solo elettrone", "particle")):
             ttk.Radiobutton(
-                actions, text=label, value=value, variable=self.nto_view, command=self._refresh_nto_pairs
+                actions, text=label, value=value, variable=self.nto_view, command=self._on_nto_view_change
             ).pack(side="left", padx=(6, 0))
         ttk.Button(actions, text="Visualizza", style="Accent.TButton", command=self._render_nto).pack(
             side="left", padx=(14, 4)
@@ -431,6 +434,7 @@ class CP2KCubeApp:
         ):
             return
         self.project = CP2KCubeProject()
+        self.nto_preview_cache.clear()
         self._refresh_all()
         self.status.set("Nuovo progetto.")
 
@@ -446,6 +450,7 @@ class CP2KCubeApp:
             return
         try:
             run = self.project.load_output(path)
+            self.nto_preview_cache.clear()
             self._refresh_all()
             self.status.set("Caricati %d stati TDDFPT da %s." % (len(run.states), Path(path).name))
         except Exception as exc:
@@ -501,6 +506,7 @@ class CP2KCubeApp:
             return
         try:
             self.project = CP2KCubeProject.load(path)
+            self.nto_preview_cache.clear()
             self._refresh_all()
             self.status.set(
                 "Progetto caricato: %s · %d mappe Omega ripristinate."
@@ -580,6 +586,8 @@ class CP2KCubeApp:
         selected = sorted((int(item) for item in self.cubes_tree.selection()), reverse=True)
         for index in selected:
             self.project.remove_assignment(self.project.assignments[index].path)
+        if selected:
+            self.nto_preview_cache.clear()
         self._refresh_all()
 
     def _show_cube_details(self, event=None):
@@ -777,9 +785,18 @@ class CP2KCubeApp:
 
         self._start_worker("analysis", work, "Analisi di %d stato/i…" % len(states))
 
-    def _render_nto(self, save_path=None):
+    def _on_nto_view_change(self):
+        self._refresh_nto_pairs()
         if self.worker is not None:
+            if self.worker_kind == "nto":
+                self.nto_redraw_pending = True
+                self.status.set("La vista NTO cambierà appena termina il precaricamento…")
             return
+        self._render_nto(silent_invalid=True)
+
+    def _render_nto(self, save_path=None, silent_invalid=False):
+        if self.worker is not None:
+            return False
         try:
             state_index = int(self.nto_state.get().lstrip("S"))
             pair_index = int(self.nto_pair.get())
@@ -796,15 +813,33 @@ class CP2KCubeApp:
             if not (0.0 < level < 1.0):
                 raise ValueError("L'isolivello deve essere tra 1 e 99%.")
         except Exception as exc:
-            self._show_error(CP2KCubeError("Selezione NTO non valida: %s" % exc))
-            return
+            if not silent_invalid:
+                self._show_error(CP2KCubeError("Selezione NTO non valida: %s" % exc))
+            return False
+
+        previews = {}
+        missing = []
+        # Preload both members when available: every subsequent view switch is
+        # then a pure redraw and never rereads a large cube.
+        for role in ("hole", "particle"):
+            if role not in roles:
+                continue
+            preview = self.nto_preview_cache.get(roles[role], resolution)
+            if preview is None:
+                missing.append(role)
+            else:
+                previews[role] = preview
+
+        destination = Path(save_path) if save_path else None
+        if not missing:
+            self._display_nto(state_index, pair_index, level, view, previews, destination, cached=True)
+            return True
 
         def work(progress):
-            previews = {}
-            role_count = len(required_roles)
-            for role_number, role in enumerate(required_roles):
+            role_count = len(missing)
+            for role_number, role in enumerate(missing):
                 assignment = roles[role]
-                previews[role] = read_preview_volume(
+                preview = read_preview_volume(
                     assignment.header,
                     max_axis_points=resolution,
                     progress=lambda fraction, message, offset=role_number: progress(
@@ -812,10 +847,35 @@ class CP2KCubeApp:
                     ),
                     cancel_event=self.cancel_event,
                 )
-            return state_index, pair_index, level, view, previews, Path(save_path) if save_path else None
+                self.nto_preview_cache.put(assignment, resolution, preview)
+                previews[role] = preview
+            return state_index, pair_index, level, view, previews, destination
 
-        view_label = {"pair": "coppia NTO", "hole": "NTO lacuna", "particle": "NTO elettrone"}[view]
-        self._start_worker("nto", work, "Lettura %s…" % view_label)
+        self._start_worker(
+            "nto", work,
+            "Precaricamento NTO %s…" % " + ".join("lacuna" if role == "hole" else "elettrone" for role in missing),
+        )
+        return True
+
+    def _display_nto(self, state, pair, level, view, previews, save_path=None, cached=False):
+        if view == "pair":
+            draw_nto_pair(self.nto_ax, previews["hole"], previews["particle"], relative_level=level)
+            view_label = "hole + particle"
+        else:
+            draw_nto(self.nto_ax, previews[view], role=view, relative_level=level)
+            view_label = "lacuna (hole)" if view == "hole" else "elettrone (particle)"
+        self.nto_ax.set_title("S%d · coppia NTO %d · %s" % (state, pair, view_label))
+        self.nto_canvas.draw_idle()
+        if save_path is not None:
+            try:
+                self.nto_figure.savefig(save_path, dpi=200)
+            except Exception as exc:
+                self._show_error(exc)
+            else:
+                self.status.set("NTO salvata: %s" % save_path.name)
+        else:
+            source = " · cache" if cached else ""
+            self.status.set("NTO visualizzata: S%d, coppia %d, %s%s." % (state, pair, view_label, source))
 
     def _start_worker(self, kind, function, message):
         self.cancel_event.clear()
@@ -858,30 +918,23 @@ class CP2KCubeApp:
                             self._draw_map()
                     elif message[1] == "nto":
                         state, pair, level, view, previews, save_path = message[2]
-                        if view == "pair":
-                            draw_nto_pair(
-                                self.nto_ax, previews["hole"], previews["particle"], relative_level=level
-                            )
-                            view_label = "hole + particle"
+                        if self.nto_redraw_pending and save_path is None:
+                            self.nto_redraw_pending = False
+                            self._render_nto(silent_invalid=True)
                         else:
-                            draw_nto(self.nto_ax, previews[view], role=view, relative_level=level)
-                            view_label = "lacuna (hole)" if view == "hole" else "elettrone (particle)"
-                        self.nto_ax.set_title("S%d · coppia NTO %d · %s" % (state, pair, view_label))
-                        self.nto_canvas.draw_idle()
-                        if save_path is not None:
-                            try:
-                                self.nto_figure.savefig(save_path, dpi=200)
-                            except Exception as exc:
-                                self._show_error(exc)
-                            else:
-                                self.status.set("NTO salvata: %s" % save_path.name)
-                        else:
-                            self.status.set("NTO visualizzata: S%d, coppia %d, %s." % (state, pair, view_label))
+                            self._display_nto(state, pair, level, view, previews, save_path)
+                            if self.nto_redraw_pending:
+                                self.nto_redraw_pending = False
+                                self._render_nto(silent_invalid=True)
                 elif message[0] == "cancelled":
                     self._finish_worker()
+                    if message[1] == "nto":
+                        self.nto_redraw_pending = False
                     self.status.set(message[2])
                 elif message[0] == "error":
                     self._finish_worker()
+                    if message[1] == "nto":
+                        self.nto_redraw_pending = False
                     self._show_error(message[2], detail=message[3])
         except queue.Empty:
             pass
