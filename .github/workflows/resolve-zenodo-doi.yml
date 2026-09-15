@@ -14,16 +14,29 @@ jobs:
     name: Resolve latest Zenodo DOI
     runs-on: ubuntu-22.04
     steps:
-      - name: Resolve Zenodo latest DOI redirect
+      - name: Resolve Zenodo DOI metadata
         shell: bash
         run: |
           set -euo pipefail
           final_url="$(curl --fail --silent --show-error --location --output /dev/null --write-out '%{url_effective}' 'https://zenodo.org/badge/latestdoi/1362776359')"
           echo "Resolved URL: ${final_url}"
-          doi="${final_url#https://doi.org/}"
-          if [[ "${doi}" == "${final_url}" || ! "${doi}" =~ ^10\.5281/zenodo\.[0-9]+$ ]]; then
-            echo "Could not resolve a valid Zenodo DOI from ${final_url}" >&2
+          record_id="${final_url##*/}"
+          if [[ ! "${record_id}" =~ ^[0-9]+$ ]]; then
+            echo "Could not resolve a Zenodo record ID from ${final_url}" >&2
             exit 1
           fi
-          echo "Zenodo DOI: ${doi}"
-          echo "::notice title=Zenodo DOI::${doi}"
+          curl --fail --silent --show-error "https://zenodo.org/api/records/${record_id}" -o zenodo-record.json
+          python3 - <<'PY'
+          import json
+          with open('zenodo-record.json', encoding='utf-8') as handle:
+              record = json.load(handle)
+          doi = record.get('doi') or record.get('pids', {}).get('doi', {}).get('identifier')
+          conceptdoi = record.get('conceptdoi') or record.get('parent', {}).get('pids', {}).get('doi', {}).get('identifier')
+          print(f"Zenodo DOI: {doi}")
+          print(f"Zenodo concept DOI: {conceptdoi}")
+          if not doi:
+              raise SystemExit('Zenodo record has no DOI')
+          print(f"::notice title=Zenodo DOI::{doi}")
+          if conceptdoi:
+              print(f"::notice title=Zenodo concept DOI::{conceptdoi}")
+          PY
