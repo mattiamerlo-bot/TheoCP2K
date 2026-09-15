@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-message: "If you use TheoCP2K in your research, please cite the software and the underlying TheoDORE publication."
+message: "If you use TheoCP2K in your research, please cite TheoCP2K using this metadata."
 title: "TheoCP2K"
 type: software
 authors:
@@ -23,15 +23,3 @@ keywords:
   - excited states
   - electron-hole analysis
   - computational chemistry
-preferred-citation:
-  type: article
-  authors:
-    - family-names: "Plasser"
-      given-names: "Felix"
-  title: "TheoDORE: A toolbox for a detailed and automated analysis of electronic excited state computations"
-  journal: "The Journal of Chemical Physics"
-  year: 2020
-  volume: 152
-  issue: 8
-  start: 084108
-  doi: "10.1063/1.5143076"
