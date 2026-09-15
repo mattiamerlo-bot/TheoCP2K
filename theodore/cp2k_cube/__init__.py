@@ -6,7 +6,7 @@ the AO overlap matrix and therefore cannot reproduce Mulliken/Lowdin charge
 transfer numbers verbatim.
 """
 
-__version__ = "0.1.3"
+__version__ = "0.1.4"
 
 from .analysis import CubeStateAnalyzer, classify_state, omega_descriptors
 from .cube import CubeValueStream, discover_cube, read_cube_header, read_preview_volume
