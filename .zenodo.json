@@ -1,0 +1,33 @@
+{
+  "title": "TheoCP2K",
+  "upload_type": "software",
+  "description": "TheoCP2K is a CP2K TDDFPT/NTO-cube extension of TheoDORE providing a graphical workflow for CP2K output and NTO cube analysis, including hole/particle visualization, fragment-based electron-hole analysis, and export of derived descriptors and figures.",
+  "creators": [
+    {
+      "name": "Merlo, Mattia"
+    }
+  ],
+  "license": "GPL-3.0-only",
+  "keywords": [
+    "CP2K",
+    "TDDFPT",
+    "NTO",
+    "TheoDORE",
+    "excited states",
+    "electron-hole analysis",
+    "computational chemistry"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/mattiamerlo-bot/TheoCP2K",
+      "relation": "isSupplementTo",
+      "scheme": "url"
+    },
+    {
+      "identifier": "10.1063/1.5143076",
+      "relation": "references",
+      "scheme": "doi"
+    }
+  ],
+  "version": "0.1.3"
+}
